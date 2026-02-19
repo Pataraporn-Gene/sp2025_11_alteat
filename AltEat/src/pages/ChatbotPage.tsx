@@ -498,7 +498,7 @@ function ChatbotPage() {
     <div
       className="min-h-screen w-full bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: "url('/src/assets/chatbot-bg.png')",
+        backgroundImage: "url('/chatbot-bg.png')",
       }}
     >
       <Navbar />
