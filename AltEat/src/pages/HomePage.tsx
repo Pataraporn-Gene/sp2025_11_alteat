@@ -8,7 +8,7 @@ import RecipeCard from "../component/RecipeCard.tsx";
 import { usePersonalizedRecommendations } from "../hooks/usePersonalizedRecommendations";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase.tsx";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslation } from 'react-i18next';
 
 

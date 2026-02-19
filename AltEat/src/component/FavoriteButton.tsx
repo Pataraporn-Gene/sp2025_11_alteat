@@ -8,7 +8,6 @@ interface FavoriteButtonProps {
 }
 
 export default function FavoriteButton({
-  recipeId,
   isFavorite,
   onToggle,
   size = 8,
