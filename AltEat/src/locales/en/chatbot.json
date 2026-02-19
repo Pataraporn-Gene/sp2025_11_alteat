@@ -1,0 +1,43 @@
+{
+  "title": "Chatbot",
+  "history": "History",
+  "newChat": "New Chat",
+  "noHistory": "No chat history yet",
+  "greeting": {
+    "title": "Hi there! Looking for a food substitute?",
+    "subtitle": "Just tell me what ingredient you have or don't have, and I'll suggest tasty alternatives.",
+    "suggestions": {
+      "milk": "Substitute for milk",
+      "soySauce": "What can replace soy sauce?",
+      "egg": "Replace egg in baking",
+      "sugar": "What can I use instead of sugar?"
+    }
+  },
+  "input": {
+    "placeholder": "How can I help you?"
+  },
+  "actions": {
+    "rename": "Rename",
+    "delete": "Delete",
+    "send": "Send"
+  },
+  "feedback": {
+    "helpful": "Was this helpful?",
+    "yes": "Yes",
+    "no": "No",
+    "comment": "Comment",
+    "commentPlaceholder": "Tell us more...",
+    "submitting": "Submitting...",
+    "thankYou": "Thank you for your feedback!"
+  },
+  "delete": {
+    "title": "Delete Chat Session?",
+    "message": "Are you sure you want to delete this chat session? This action cannot be undone.",
+    "cancel": "Cancel",
+    "confirm": "Delete"
+  },
+  "loading": "Loading...",
+  "error": {
+    "processing": "Sorry, there was an error processing your request. Please try again."
+  }
+}

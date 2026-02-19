@@ -1,0 +1,31 @@
+{
+  "search": {
+    "title": "ส่วนผสมตามบริบท",
+    "subtitle": "ค้นพบส่วนผสมที่ทำให้อาหารทุกมื้ออร่อย",
+    "searchPlaceholder": "ค้นหาส่วนผสมตามบริบท (เช่น 'ดำ เค็ม')...",
+    "noIngredientsFound": "ไม่พบส่วนผสม",
+    "adjustFilters": "ลองปรับตัวกรองหรือคำค้นหา",
+    "selectFilters": "เลือกตัวกรองหรือค้นหาเพื่อค้นหาส่วนผสม",
+    "useFilters": "ใช้ตัวกรองแถบด้านข้างหรือแถบค้นหาเพื่อค้นพบส่วนผสม",
+    "loadingIngredients": "กำลังโหลดส่วนผสม..."
+  },
+  "detail": {
+    "moreDetail": "รายละเอียดเพิ่มเติม",
+    "otherNames": "ชื่ออื่น",
+    "flavors": "รสชาติ",
+    "textures": "เนื้อสัมผัส",
+    "colors": "สี",
+    "shapes": "รูปร่าง",
+    "cookingMethods": "วิธีการปรุง",
+    "benefits": "ประโยชน์",
+    "vitamins": "วิตามิน",
+    "minerals": "แร่ธาตุ",
+    "nutrients": "สารอาหาร"
+  },
+  "filters": {
+    "taste": "รสชาติ",
+    "texture": "เนื้อสัมผัส",
+    "color": "สี",
+    "shape": "รูปร่าง"
+  }
+}

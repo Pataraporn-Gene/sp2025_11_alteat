@@ -1,0 +1,13 @@
+{
+  "welcome": "Welcome to AltEat",
+  "subtitle": "Get started by choosing what you'd like to do today.",
+  "searchPlaceholder": "How can I help you?",
+  "send": "Send",
+  "needSomethingElse": "Need something else?",
+  "recommendedRecipes": "Recommend Recipes",
+  "tools": {
+    "recipeSuggestion": "Recipe Suggestion & Lookup",
+    "ingredientContext": "Ingredient with Context",
+    "ingredientSubstitution": "Ingredient Substitution"
+  }
+}

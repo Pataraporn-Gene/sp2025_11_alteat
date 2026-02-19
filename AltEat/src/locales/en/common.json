@@ -1,0 +1,17 @@
+{
+  "loading": "Loading...",
+  "error": "Error",
+  "success": "Success",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "search": "Search",
+  "back": "Back",
+  "more": "More",
+  "viewMore": "View More",
+  "showLess": "Show less",
+  "showMore": "Show more",
+  "noResults": "No results found",
+  "tryAgain": "Try again"
+}

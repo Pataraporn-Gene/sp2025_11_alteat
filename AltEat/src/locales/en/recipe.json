@@ -1,0 +1,36 @@
+{
+  "search": {
+    "title": "Recipe Suggestion and Look Up",
+    "subtitle": "Not sure what to cook? Get recipe ideas based on the ingredients you have!",
+    "searchPlaceholder": "Search recipes or ingredients...",
+    "youCanMake": "You can make {{count}} recipe",
+    "youCanMake_plural": "You can make {{count}} recipes",
+    "noRecipesFound": "No recipes found",
+    "adjustFilters": "Try adjusting your filters or search terms",
+    "selectFilters": "Select filters or search to find recipes",
+    "useFilters": "Use the sidebar filters or search bar to discover recipes",
+    "loadingRecipes": "Loading recipes...",
+    "loadingMore": "Loading more..."
+  },
+  "detail": {
+    "ingredients": "Ingredients",
+    "howToMake": "How to Make ",
+    "nutritionInfo": "Nutrition Information",
+    "recommended": "Recommended recipes",
+    "prepTime": "Prep Time:",
+    "cookTime": "Cook Time:",
+    "totalTime": "Total Time:",
+    "servings": "Servings:",
+    "recipeNotFound": "Recipe not found",
+    "errorLoading": "Error loading recipe",
+    "noRecommendations": "No recommendations available"
+  },
+  "filters": {
+    "ingredient": "Ingredient",
+    "method": "Cooking Method",
+    "cuisine": "Cuisine"
+  },
+  "card": {
+    "more": "More"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "search": {
+    "title": "Ingredient with Context",
+    "subtitle": "Discover ingredient combinations that make every meal delicious.",
+    "searchPlaceholder": "Search ingredients by context (e.g., 'black salty')...",
+    "noIngredientsFound": "No ingredients found",
+    "adjustFilters": "Try adjusting your filters or search terms",
+    "selectFilters": "Select filters or search to find ingredients",
+    "useFilters": "Use the sidebar filters or search bar to discover ingredients",
+    "loadingIngredients": "Loading ingredients..."
+  },
+  "detail": {
+    "moreDetail": "More Detail",
+    "otherNames": "Other Names",
+    "flavors": "Flavors",
+    "textures": "Textures",
+    "colors": "Colors",
+    "shapes": "Shapes",
+    "cookingMethods": "Cooking Methods",
+    "benefits": "Benefits",
+    "vitamins": "Vitamins",
+    "minerals": "Minerals",
+    "nutrients": "Nutrients"
+  },
+  "filters": {
+    "taste": "Taste",
+    "texture": "Texture",
+    "color": "Color",
+    "shape": "Shape"
+  }
+}

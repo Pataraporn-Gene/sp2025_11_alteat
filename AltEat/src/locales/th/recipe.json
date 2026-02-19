@@ -1,0 +1,36 @@
+{
+  "search": {
+    "title": "แนะนำสูตรอาหารและค้นหา",
+    "subtitle": "ไม่รู้จะทำอะไรดี? รับไอเดียสูตรอาหารจากวัตถุดิบที่คุณมี!",
+    "searchPlaceholder": "ค้นหาสูตรอาหารหรือวัตถุดิบ...",
+    "youCanMake": "คุณสามารถทำได้ {{count}} สูตร",
+    "youCanMake_plural": "คุณสามารถทำได้ {{count}} สูตร",
+    "noRecipesFound": "ไม่พบสูตรอาหาร",
+    "adjustFilters": "ลองปรับตัวกรองหรือคำค้นหา",
+    "selectFilters": "เลือกตัวกรองหรือค้นหาเพื่อค้นหาสูตรอาหาร",
+    "useFilters": "ใช้ตัวกรองแถบด้านข้างหรือแถบค้นหาเพื่อค้นพบสูตรอาหาร",
+    "loadingRecipes": "กำลังโหลดสูตรอาหาร...",
+    "loadingMore": "กำลังโหลดเพิ่มเติม..."
+  },
+  "detail": {
+    "ingredients": "ส่วนผสม",
+    "howToMake": "วิธีทำ",
+    "nutritionInfo": "ข้อมูลโภชนาการ",
+    "recommended": "สูตรอาหารแนะนำ",
+    "prepTime": "เวลาเตรียม:",
+    "cookTime": "เวลาปรุง:",
+    "totalTime": "เวลารวม:",
+    "servings": "สำหรับ:",
+    "recipeNotFound": "ไม่พบสูตรอาหาร",
+    "errorLoading": "เกิดข้อผิดพลาดในการโหลดสูตรอาหาร",
+    "noRecommendations": "ไม่มีคำแนะนำ"
+  },
+  "filters": {
+    "ingredient": "วัตถุดิบ",
+    "method": "วิธีการปรุง",
+    "cuisine": "ประเภทอาหาร"
+  },
+  "card": {
+    "more": "เพิ่มเติม"
+  }
+}

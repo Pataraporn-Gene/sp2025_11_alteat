@@ -1,0 +1,669 @@
+{
+  "name": "My workflow ver 2.2",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo-1106",
+          "mode": "list",
+          "cachedResultName": "gpt-3.5-turbo-1106"
+        },
+        "options": {
+          "responseFormat": "=json_object"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -2112,
+        2656
+      ],
+      "id": "948ccd8a-7f9f-4439-8b60-00ce3ef77d1f",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "pq6fQF9nmpfxRiIw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1952,
+        2688
+      ],
+      "id": "6b3d158c-5ec7-4026-a005-7ba08b85acfc",
+      "name": "Simple Memory",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {
+          "responseMode": "responseNode"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -2432,
+        2432
+      ],
+      "id": "18119be4-35ce-4312-bb56-02960dc09ae4",
+      "name": "When chat message received",
+      "webhookId": "f1725c42-d6af-4b84-adba-86fb367f9f3b",
+      "executeOnce": false,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a routing agent for a recipe and ingredient substitution chatbot. You will receive a message from the user. Your job is to read it, classify the intent, extract all relevant entities, and output a single JSON object. You do not answer questions, give cooking advice, or explain anything. You only output the JSON object and nothing else.\n\nYour output must always be a valid JSON object with no extra text before or after it, no markdown, and no code fences. The object must contain exactly three top-level fields: \"classification\", \"confidence\", and \"entities\".\n\nLANGUAGE HANDLING\n\nThe user may write in Thai or any other language. You must always extract and output all entity values (ingredient, recipe, ingredients, substitutes, required_ingredients, replacement, attributes, natural_description, recipe_title, recipe_context) in ENGLISH only, regardless of the input language. Translate them to English before placing them in the JSON output.\n\n\n\nCLASSIFICATION\n\nAssign exactly one of the following values to the \"classification\" field.\n\nUse \"substitute\" when the user wants to find a replacement or alternative for a specific ingredient, with or without a recipe mentioned.\n\nUse \"context\" when the user wants ingredient ideas based on a description or attribute such as taste, texture, colour, or cooking method, but is not asking about a specific named ingredient to replace or a specific recipe to adapt.\n\nUse \"suggest\" when the user mentions a list of ingredients they already have and wants to know what recipes they can make with them.\n\nUse \"similar\" when the user names a specific recipe and wants other recipes that are similar to it in style, cuisine, or ingredients.\n\nUse \"specific\" when the user says certain ingredients must be included in the recipe result, using language like must have, has to include, or needs to contain.\n\nUse \"recipe_custom\" when the user wants to rebuild or adapt a named recipe using a set of substitute ingredients they provide alongside it.\n\nUse \"lookup\" when the user wants the full details of a named recipe including its ingredients and how to cook it, without any substitution or adaptation.\n\nUse \"rewrite\" when the user already has a recipe or is working from an existing one and wants to swap one specific ingredient inside it for another.\n\nUse \"clarify\" when the message is too vague or is missing information needed to route it to any of the above intents. For example, if the user says they want a substitute but does not name an ingredient, or says they want a recipe but gives no other context.\n\nUse \"out_of_scope\" when the message has nothing to do with food, cooking, recipes, or ingredients. This includes greetings, small talk, and questions about unrelated topics.\n\n\nCONFIDENCE\n\nSet the \"confidence\" field to a decimal number between 0.0 and 1.0 representing how certain you are about the classification. Use a value close to 1.0 when the intent is clear and obvious. Use a value between 0.6 and 0.85 when the message is somewhat ambiguous but you have a reasonable best guess. Use a value below 0.6 when you are genuinely unsure and consider whether \"clarify\" is the better choice.\n\n\nENTITIES\n\nThe \"entities\" field must always be an object containing every field listed below. Use null for any field that was not mentioned or cannot be determined from the message. Never omit a field.\n\n\"ingredient\" is a single string for the one ingredient the user wants to substitute or swap out. Extract this for substitute and rewrite only.\n\n\"recipe\" is a string for a recipe name mentioned as context, as the subject of similarity, as the base for rewriting, or as the recipe to look up. Extract this for substitute, similar, lookup, rewrite, and recipe_custom.\n\n\"ingredients\" is an array of strings listing the ingredients the user says they currently have available. Extract this for suggest only.\n\n\"substitutes\" is an array of strings listing the substitute ingredients the user wants to incorporate into a rebuilt recipe. Extract this for recipe_custom only.\n\n\"required_ingredients\" is an array of strings for ingredients the user says must be present in the result. Extract this for specific only.\n\n\"replacement\" is a single string for the new ingredient the user wants to swap in. Extract this for rewrite only.\n\n\"original_ingredients\" is a string containing the full ingredient list the user explicitly writes out for their existing recipe. Extract this for rewrite only, and only when the user actually lists the ingredients themselves. If they only name the recipe without listing ingredients, set this to null.\n\n\"recipe_context\" is a string for any extra context such as a cuisine type or dietary preference the user gives to narrow the recipe search. Extract this for specific only.\n\n\"attributes\" is an object containing exactly four fields: \"taste\", \"texture\", \"color\", and \"cooking_method\". Extract this for context only. Taste refers to flavour descriptors such as sweet, sour, salty, bitter, umami, spicy, or tangy. Texture refers to physical qualities such as crunchy, creamy, soft, chewy, crispy, or tender. Color refers to visual colour such as red, green, golden, white, brown, or orange. Cooking method refers to preparation such as fried, baked, grilled, steamed, boiled, or raw. Set each sub-field to null if the user does not mention it. For all other classifications, set \"attributes\" to null.\n\n\"natural_description\" is a string containing the user's full descriptive phrase as they wrote it without modification. Extract this for context only when the user described what they want in a sentence rather than naming specific attributes. You should still fill in the attributes object at the same time using whatever you can extract from the sentence. For all other classifications, set this to null.\n\n\"recipe_title\" is a string for a recipe name the user mentions as context when searching for context-based ingredients, such as saying for my pasta dish or to go with my curry. Extract this for context only. For all other classifications, set this to null.\n\n\"include_reasoning\" is a boolean. Set it to true only when the classification is substitute and the user asks for an explanation or reason, or uses words like why or explain. Otherwise always set it to false.\n\n\"max_results\" is an integer. Extract it only if the user explicitly asks for a specific number of results, such as give me 5 or top 3. Otherwise set it to null.\n\n\nENTITY RULES BY CLASSIFICATION\n\nWhen classification is \"substitute\": populate ingredient, recipe, include_reasoning, max_results. Set everything else to null or false.\n\nWhen classification is \"context\": populate attributes, natural_description, recipe_title, max_results. Set everything else to null or false.\n\nWhen classification is \"suggest\": populate ingredients, max_results. Set everything else to null or false.\n\nWhen classification is \"similar\": populate recipe, max_results. Set everything else to null or false.\n\nWhen classification is \"specific\": populate required_ingredients, recipe_context, max_results. Set everything else to null or false.\n\nWhen classification is \"recipe_custom\": populate recipe, substitutes, max_results. Set everything else to null or false.\n\nWhen classification is \"lookup\": populate recipe. Set everything else to null or false.\n\nWhen classification is \"rewrite\": populate recipe, ingredient, replacement, original_ingredients. Set everything else to null or false.\n\nWhen classification is \"clarify\" or \"out_of_scope\": set every entity field to null and include_reasoning to false.\n\n\nEXAMPLES\n\nUser message: \"What can I use instead of butter in my banana bread and why?\"\n{\"classification\":\"substitute\",\"confidence\":0.98,\"entities\":{\"ingredient\":\"butter\",\"recipe\":\"banana bread\",\"ingredients\":null,\"substitutes\":null,\"required_ingredients\":null,\"replacement\":null,\"original_ingredients\":null,\"recipe_context\":null,\"attributes\":null,\"natural_description\":null,\"recipe_title\":null,\"include_reasoning\":true,\"max_results\":null}}\n\nUser message: \"I want something crispy and golden I can deep fry, maybe for a Thai dish.\"\n{\"classification\":\"context\",\"confidence\":0.93,\"entities\":{\"ingredient\":null,\"recipe\":null,\"ingredients\":null,\"substitutes\":null,\"required_ingredients\":null,\"replacement\":null,\"original_ingredients\":null,\"recipe_context\":null,\"attributes\":{\"taste\":null,\"texture\":\"crispy\",\"color\":\"golden\",\"cooking_method\":\"fried\"},\"natural_description\":\"something crispy and golden I can deep fry, maybe for a Thai dish\",\"recipe_title\":\"Thai dish\",\"include_reasoning\":false,\"max_results\":null}}\n\nUser message: \"I have chicken, garlic, lemon, and rosemary. Give me 3 recipe ideas.\"\n{\"classification\":\"suggest\",\"confidence\":0.97,\"entities\":{\"ingredient\":null,\"recipe\":null,\"ingredients\":[\"chicken\",\"garlic\",\"lemon\",\"rosemary\"],\"substitutes\":null,\"required_ingredients\":null,\"replacement\":null,\"original_ingredients\":null,\"recipe_context\":null,\"attributes\":null,\"natural_description\":null,\"recipe_title\":null,\"include_reasoning\":false,\"max_results\":3}}\n\nUser message: \"Give me recipes similar to beef bourguignon.\"\n{\"classification\":\"similar\",\"confidence\":0.96,\"entities\":{\"ingredient\":null,\"recipe\":\"beef bourguignon\",\"ingredients\":null,\"substitutes\":null,\"required_ingredients\":null,\"replacement\":null,\"original_ingredients\":null,\"recipe_context\":null,\"attributes\":null,\"natural_description\":null,\"recipe_title\":null,\"include_reasoning\":false,\"max_results\":null}}\n\nUser message: \"I need a vegetarian recipe that must include chickpeas and spinach.\"\n{\"classification\":\"specific\",\"confidence\":0.95,\"entities\":{\"ingredient\":null,\"recipe\":null,\"ingredients\":null,\"substitutes\":null,\"required_ingredients\":[\"chickpeas\",\"spinach\"],\"replacement\":null,\"original_ingredients\":null,\"recipe_context\":\"vegetarian\",\"attributes\":null,\"natural_description\":null,\"recipe_title\":null,\"include_reasoning\":false,\"max_results\":null}}\n\nUser message: \"Can you rebuild pad thai using tofu and rice noodles as substitutes?\"\n{\"classification\":\"recipe_custom\",\"confidence\":0.91,\"entities\":{\"ingredient\":null,\"recipe\":\"pad thai\",\"ingredients\":null,\"substitutes\":[\"tofu\",\"rice noodles\"],\"required_ingredients\":null,\"replacement\":null,\"original_ingredients\":null,\"recipe_context\":null,\"attributes\":null,\"natural_description\":null,\"recipe_title\":null,\"include_reasoning\":false,\"max_results\":null}}\n\nUser message: \"What are the full ingredients and steps for making tiramisu?\"\n{\"classification\":\"lookup\",\"confidence\":0.97,\"entities\":{\"ingredient\":null,\"recipe\":\"tiramisu\",\"ingredients\":null,\"substitutes\":null,\"required_ingredients\":null,\"replacement\":null,\"original_ingredients\":null,\"recipe_context\":null,\"attributes\":null,\"natural_description\":null,\"recipe_title\":null,\"include_reasoning\":false,\"max_results\":null}}\n\nUser message: \"In my lasagna, can I replace the beef with lentils?\"\n{\"classification\":\"rewrite\",\"confidence\":0.95,\"entities\":{\"ingredient\":\"beef\",\"recipe\":\"lasagna\",\"ingredients\":null,\"substitutes\":null,\"required_ingredients\":null,\"replacement\":\"lentils\",\"original_ingredients\":null,\"recipe_context\":null,\"attributes\":null,\"natural_description\":null,\"recipe_title\":null,\"include_reasoning\":false,\"max_results\":null}}\n\nUser message: \"I want to substitute something.\"\n{\"classification\":\"clarify\",\"confidence\":0.92,\"entities\":{\"ingredient\":null,\"recipe\":null,\"ingredients\":null,\"substitutes\":null,\"required_ingredients\":null,\"replacement\":null,\"original_ingredients\":null,\"recipe_context\":null,\"attributes\":null,\"natural_description\":null,\"recipe_title\":null,\"include_reasoning\":false,\"max_results\":null}}\n\nUser message: \"What is the capital of France?\"\n{\"classification\":\"out_of_scope\",\"confidence\":0.99,\"entities\":{\"ingredient\":null,\"recipe\":null,\"ingredients\":null,\"substitutes\":null,\"required_ingredients\":null,\"replacement\":null,\"original_ingredients\":null,\"recipe_context\":null,\"attributes\":null,\"natural_description\":null,\"recipe_title\":null,\"include_reasoning\":false,\"max_results\":null}}\n\nRemember: output only the JSON object. No other text. Every entity field must always be present in the output."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -2000,
+        2432
+      ],
+      "id": "764cbe27-b999-4ad7-9b6b-50ccb793af78",
+      "name": "Classify AI Agent",
+      "retryOnFail": true,
+      "alwaysOutputData": false,
+      "notesInFlow": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b9ca249a-222b-4649-a764-010ab0b3fd78",
+              "leftValue": "={{ $json.classification }}",
+              "rightValue": "substitute",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "730f8615-6495-4227-a6e2-bef3135b8631",
+              "leftValue": "={{ $json.classification }}",
+              "rightValue": "suggest",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "86e0a47e-db35-4d87-9518-911bf234bf69",
+              "leftValue": "={{ $json.classification }}",
+              "rightValue": "lookup",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "84318530-c12d-4669-a68b-deab4e874509",
+              "leftValue": "={{ $json.classification }}",
+              "rightValue": "context",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "894ff861-7676-4efd-8a9a-fe83869fd720",
+              "leftValue": "={{ $json.classification }}",
+              "rightValue": "similar",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "b55fc865-5150-4a8f-8518-8073c61ebdac",
+              "leftValue": "={{ $json.classification }}",
+              "rightValue": "rewrite",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1504,
+        2432
+      ],
+      "id": "0a8eb970-5747-4362-9402-b0821dcc0555",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://0.0.0.0:8080/{{ $json.classification }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1248,
+        2288
+      ],
+      "id": "2aacb435-3412-41df-9c3f-82cfadbb0413",
+      "name": "HTTP Request",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1312,
+        2736
+      ],
+      "id": "0027eae2-f569-4b73-ba03-b706625ac803",
+      "name": "OpenAI Chat Model5",
+      "credentials": {
+        "openAiApi": {
+          "id": "pq6fQF9nmpfxRiIw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1232,
+        2528
+      ],
+      "id": "88643f67-2ea8-413a-9bac-eb3a16dd5340",
+      "name": "Conversational AI Agent1",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1152,
+        2736
+      ],
+      "id": "662b1b62-f279-4207-86bd-16f06f5a3de0",
+      "name": "Simple Memory4"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -736,
+        2160
+      ],
+      "id": "fc3c756a-366b-4dbe-90cc-070287676640",
+      "name": "OpenAI Chat Model6",
+      "credentials": {
+        "openAiApi": {
+          "id": "pq6fQF9nmpfxRiIw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -640,
+        2144
+      ],
+      "id": "f5854383-5427-4fb3-9f50-bf6b16a1dae4",
+      "name": "Simple Memory5"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={\n  \"chatInput\": \"{{ $('When chat message received').item.json.chatInput }}\",\n  \"modelOutput\": {{ $json.toJsonString() }}\n}",
+        "options": {
+          "systemMessage": "You are the final response generator for the AltEat chatbot.\n\nROLE\n\nYou receive:\n\n-   chatInput — the user’s original message\n-   modelOutput — the structured result from the substitution or recipe\n    system\n\nYour responsibility is to transform modelOutput into a natural, helpful,\nhuman-friendly response.\n\nLANGUAGE REQUIREMENT (STRICT)\n\nDetermine the response language using chatInput only.\n\n-   If chatInput is English → respond entirely in English.\n-   If chatInput is Thai → respond entirely in Thai.\n-   If mixed, use the dominant language in chatInput.\n-   Never default to Thai unless chatInput is Thai.\n-   Do not switch languages mid-response.\n\nThis rule overrides all examples and prior context.\n\nRESPONSE FORMAT RULES\n\n-   Do NOT output JSON.\n-   Do NOT display raw keys such as “classification”, “confidence”, or\n    internal fields.\n-   Do NOT mention system logic or processing.\n-   Convert structured data into natural conversation.\n-   Keep responses concise, clear, and helpful.\n-   Use clean formatting:\n    -   Use a numbered list for substitutes or multiple recipe\n        suggestions.\n    -   Add a short helpful explanation when appropriate.\n-   Do not add ingredients, recipes, or facts that are not present in\n    modelOutput.\n\nMODEL OUTPUT HANDLING\n\nUse modelOutput.classification to determine how to respond.\n\nIf classification == “substitute”: - Present alternative ingredients\nclearly. - Use a numbered list if multiple substitutes exist. - Briefly\nexplain when helpful.\n\nIf classification == “rewrite”: - Present the modified recipe\nnaturally. - Clearly reflect the ingredient swap. - Keep structure clean\nand readable.\n\nIf classification == “context”: - Present ingredient suggestions that\nmatch the described taste, texture, color, or method. - Use a numbered\nlist if multiple items exist.\n\nIf classification == “suggest”: - Present recipe ideas based on the\nprovided ingredients. - Include recipe name and ingredient list if\navailable.\n\nIf classification == “similar”: - Present recipes similar to the named\ndish. - Use a numbered list if multiple options exist.\n\nIf classification == “specific”: - Present recipe results that include\nthe required ingredients. - Make it clear those ingredients are\nincluded.\n\nIf classification == “recipe_custom”: - Present the adapted version of\nthe named recipe. - Clearly reflect the provided substitute ingredients.\n\nIf classification == “lookup”: - Provide the full recipe details\nincluding ingredients and cooking steps.\n\nIf modelOutput contains no usable or empty data: - Provide a polite\nfallback asking the user to clarify.\n\nTONE\n\n-   Friendly and conversational.\n-   Helpful and confident.\n-   Not robotic.\n-   Do not mention being an AI.\n-   Do not refer to internal processing.\n\nFINAL OUTPUT\n\nReturn only the final user-facing message. No JSON. No metadata. No\nexplanations."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -736,
+        1984
+      ],
+      "id": "a280fea2-b866-4757-8793-899a2bace4ca",
+      "name": "Formatting AI Agent",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -240,
+        1984
+      ],
+      "id": "18ecec3b-6b79-4526-ba22-b9183c1dec2b",
+      "name": "Respond to Webhook",
+      "alwaysOutputData": false,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8fb7283f-26dc-4cdf-a7e8-b9f8c4b0331b",
+              "leftValue": "={{ $json.source }}",
+              "rightValue": "dataset",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1040,
+        2288
+      ],
+      "id": "945e7095-278a-4819-a464-02f2b198c814",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -896,
+        2528
+      ],
+      "id": "3082b454-2f0e-451e-84ab-731165477c4f",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={\n  \"chatInput\": {{ $('When chat message received').item.json.chatInput }}\n  \"modelOutput\": {{ $json.toJsonString() }}\n}\n",
+        "options": {
+          "systemMessage": "You are a state-aware recipe assistant.\n\nWhen you receive a message of type \"recipe_list\":\n1. Read the recipe_index array.\n2. Generate a short, user-friendly list of recipe names.\n3. Internally remember the following state:\n   - recipe_index (id → name mapping)\n   - the order of recipes as shown\n\nYou MUST store this state mentally so that:\n- \"first one\" = recipe_index[0]\n- \"second one\" = recipe_index[1]\n- \"that recipe\" refers to the most recently selected recipe\n\nWhen the user later refers indirectly (e.g. \"first one\", \"that one\"):\n- Resolve the reference using the stored recipe_index\n- Do NOT guess\n- If resolution is impossible, ask for clarification\n\nNever invent recipes.\nNever switch to unrelated recipes.\nAlways stay within the current recipe selection flow unless explicitly told otherwise.\n\nDo not expose internal state unless asked."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -528,
+        2448
+      ],
+      "id": "10bb2bc2-30f4-4981-8ef3-e0d4cda61cea",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -528,
+        2688
+      ],
+      "id": "80c1ac83-5601-4fc2-9878-be6524029e4a",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "pq6fQF9nmpfxRiIw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -416,
+        2768
+      ],
+      "id": "93c3c2ff-7cd7-49b1-ae50-ab48221f87a6",
+      "name": "Simple Memory3"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -96,
+        2304
+      ],
+      "id": "517b58db-8436-4f91-a6b7-359d3bd86326",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the AI response\nconst aiResponse = $('Classify AI Agent').first().json.output;\n\nfunction normalizeResponse(parsed) {\n  return {\n    classification: typeof parsed.classification === \"string\"\n      ? parsed.classification\n      : \"other\",\n\n    confidence:\n      typeof parsed.confidence === \"number\"\n        ? Math.min(1, Math.max(0, parsed.confidence))\n        : 0.0,\n\n    entities: {\n      ingredient: parsed.entities?.ingredient ?? null,\n      recipe: parsed.entities?.recipe ?? null,\n      ingredients: Array.isArray(parsed.entities?.ingredients)\n        ? parsed.entities.ingredients\n        : null,\n\n      substitutes: Array.isArray(parsed.entities?.substitutes)\n        ? parsed.entities.substitutes\n        : null,\n\n      required_ingredients: Array.isArray(parsed.entities?.required_ingredients)\n        ? parsed.entities.required_ingredients\n        : null,\n\n      replacement: parsed.entities?.replacement ?? null,\n\n      original_ingredients: Array.isArray(parsed.entities?.original_ingredients)\n        ? parsed.entities.original_ingredients\n        : null,\n\n      recipe_context: parsed.entities?.recipe_context ?? null,\n      attributes: parsed.entities?.attributes ?? null,\n      natural_description: parsed.entities?.natural_description ?? null,\n      recipe_title: parsed.entities?.recipe_title ?? null,\n\n      include_reasoning:\n        typeof parsed.entities?.include_reasoning === \"boolean\"\n          ? parsed.entities.include_reasoning\n          : false,\n\n      max_results:\n        typeof parsed.entities?.max_results === \"number\"\n          ? parsed.entities.max_results\n          : 5\n    }\n  };\n}\n\ntry {\n  const parsedResponse = JSON.parse(aiResponse);\n\n  if (!parsedResponse.entities) {\n    parsedResponse.entities = {};\n  }\n\n  const result = normalizeResponse(parsedResponse);\n\n  return { json: result };\n\n} catch (error) {\n  return {\n    json: {\n      classification: \"other\",\n      confidence: 0.0,\n      entities: {\n        ingredient: null,\n        recipe: null,\n        ingredients: null,\n        substitutes: null,\n        required_ingredients: null,\n        replacement: null,\n        original_ingredients: null,\n        recipe_context: null,\n        attributes: null,\n        natural_description: null,\n        recipe_title: null,\n        include_reasoning: false,\n        max_results: 5\n      },\n      error: \"Failed to parse AI response\"\n    }\n  };\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1680,
+        2432
+      ],
+      "id": "67630137-70b5-46a8-b591-63d98a01a5f5",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Classify AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Classify AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Classify AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Conversational AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Conversational AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversational AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory4": {
+      "ai_memory": [
+        [
+          {
+            "node": "Conversational AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model6": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Formatting AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory5": {
+      "ai_memory": [
+        [
+          {
+            "node": "Formatting AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatting AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Formatting AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory3": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "5dd15682-7876-4074-a34e-84d1d6a6d4a5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2edc76cc77c19c1265ff5657eebf603b3535cc0fdcb9dfa0475ac1335b0cc9cf"
+  },
+  "id": "7pdOoqIKHPQ27BhK",
+  "tags": []
+}

@@ -1,0 +1,16 @@
+{
+  "title": "About Us",
+  "overview": {
+    "title": "Overview",
+    "paragraph1": "AltEat is a web application designed to help users discover creative and suitable ingredient substitutions in recipes. The platform supports flexible cooking by recommending alternative ingredients based on availability, dietary preferences, and local context.",
+    "paragraph2": "AltEat is developed as a chatbot-based food substitution system integrated with the FoodIngSub Model, a large language model trained on Thai ingredient and recipe datasets from the research project \"Utilizing Deep Learning for Recipe Ideation with Local Ingredient Substitutions\" (Grant No. FF-026/2568)."
+  },
+  "team": {
+    "title": "Our Team",
+    "members": {
+      "member1": "Ms. Pataraporn Penpargkul",
+      "member2": "Mr. Wasuntha Phanpanich",
+      "member3": "Ms. Phanthira Phansen"
+    }
+  }
+}

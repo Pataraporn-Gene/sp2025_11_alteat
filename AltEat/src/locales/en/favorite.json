@@ -1,0 +1,13 @@
+{
+  "title": "Favorite",
+  "noFavorites": "You don't have any favorite recipes yet.",
+  "noFavoritesMessage": "Start exploring recipes and click the heart icon to save your favorites here.",
+  "loadingFavorites": "Loading favorites...",
+  "saveFavoritesTitle": "Save Your Favorite Recipes!",
+  "saveFavoritesMessage": "Log in or create an account to keep track of all the recipes you love, and access them anytime, anywhere.",
+  "loginRequired": "This feature is available to registered users only. Please",
+  "login": "Log In",
+  "or": "or",
+  "signup": "Sign Up",
+  "first": "first."
+}

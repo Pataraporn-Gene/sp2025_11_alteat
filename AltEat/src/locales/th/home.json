@@ -1,0 +1,13 @@
+{
+  "welcome": "ยินดีต้อนรับสู่ AltEat",
+  "subtitle": "เริ่มต้นโดยเลือกสิ่งที่คุณต้องการทำวันนี้",
+  "searchPlaceholder": "ฉันช่วยอะไรคุณได้บ้าง?",
+  "send": "ส่ง",
+  "needSomethingElse": "ต้องการอย่างอื่นไหม?",
+  "recommendedRecipes": "สูตรอาหารแนะนำ",
+  "tools": {
+    "recipeSuggestion": "แนะนำสูตรอาหารและค้นหา",
+    "ingredientContext": "ส่วนผสมตามบริบท",
+    "ingredientSubstitution": "ทดแทนส่วนผสม"
+  }
+}
