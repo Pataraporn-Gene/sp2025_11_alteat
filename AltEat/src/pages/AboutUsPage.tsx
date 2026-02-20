@@ -7,9 +7,9 @@ function AboutUsPage() {
     return(
         <div className="min-h-screen bg-[#FFEDDD]">
             <Navbar />
-            <div className="mt-10 max-w-7xl m-auto w-[60%]">
+            <div className="mt-10 max-w-7xl mx-auto w-full px-4 sm:px-8 md:w-[75%] lg:w-[60%]">
                 {/* Title */}
-                <h1 className="text-5xl font-bold text-center mb-12">
+                <h1 className="text-3xl sm:text-5xl font-bold text-center mb-8 sm:mb-12">
                     {t('title')}
                 </h1>
 
@@ -34,7 +34,7 @@ function AboutUsPage() {
                     <img
                         src="/overview.png"
                         alt="Overview"
-                        className="w-full h-auto rounded-xl shadow-md"
+                        className="w-28 h-28 sm:w-40 sm:h-40 mx-auto object-cover rounded-full shadow-md"
                     />
                     </div>
                 </div>

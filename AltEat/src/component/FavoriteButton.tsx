@@ -10,7 +10,7 @@ interface FavoriteButtonProps {
 export default function FavoriteButton({
   isFavorite,
   onToggle,
-  size = 8,
+  size = 32,
 }: FavoriteButtonProps) {
   return (
     <button
@@ -23,7 +23,8 @@ export default function FavoriteButton({
       className="z-10"
     >
       <Heart
-        className={`w-${size} h-${size} transition-colors cursor-pointer hover:scale-110 ${
+        style={{ width: size, height: size }} // 👈 use inline style for dynamic sizing
+        className={`transition-colors cursor-pointer hover:scale-110 ${
           isFavorite
             ? "fill-red-500 text-red-500"
             : "text-gray-400 fill-white"

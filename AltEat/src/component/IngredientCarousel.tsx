@@ -1,10 +1,28 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import IngredientDetailPopup, { type IngredientDetail } from "./IngredientDetailPopup";
 import { useTranslation } from "react-i18next";
 
 interface IngredientCarouselProps {
   ingredients: IngredientDetail[];
+}
+
+// 👇 Add this hook
+function useCardsPerView() {
+  const [cardsPerView, setCardsPerView] = useState(3);
+
+  useEffect(() => {
+    const update = () => {
+      if (window.innerWidth < 640) setCardsPerView(1);
+      else if (window.innerWidth < 1024) setCardsPerView(2);
+      else setCardsPerView(3);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  return cardsPerView;
 }
 
 function IngredientCarousel({ ingredients }: IngredientCarouselProps) {
@@ -13,9 +31,13 @@ function IngredientCarousel({ ingredients }: IngredientCarouselProps) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const { t } = useTranslation('ingredient');
 
-  // Calculate how many cards to show based on screen size
-  const cardsPerView = 3;
+  const cardsPerView = useCardsPerView(); // 👈 replaces the hardcoded 3
   const maxIndex = Math.max(0, ingredients.length - cardsPerView);
+
+  // 👇 Reset index when cardsPerView changes to avoid getting stuck
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [cardsPerView]);
 
   const handlePrevious = () => {
     setCurrentIndex((prev) => Math.max(0, prev - 1));
@@ -48,20 +70,18 @@ function IngredientCarousel({ ingredients }: IngredientCarouselProps) {
   }
 
   return (
-    <div className="w-full max-w-2xl">
+    <div className="w-full max-w-2xl px-4 sm:px-0"> {/* 👈 added px-4 on mobile */}
       <div className="relative">
-        {/* Previous Button */}
         {currentIndex > 0 && (
           <button
             onClick={handlePrevious}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-10 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 sm:-translate-x-3 z-10 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors" // 👈 smaller offset on mobile
             aria-label="Previous ingredients"
           >
             <ChevronLeft className="w-5 h-5 text-gray-600" />
           </button>
         )}
 
-        {/* Carousel Container */}
         <div className="overflow-hidden p-1">
           <div
             className="flex gap-3 transition-transform duration-300 ease-in-out"
@@ -75,17 +95,14 @@ function IngredientCarousel({ ingredients }: IngredientCarouselProps) {
                 className="flex-shrink-0 bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
                 style={{ width: `calc(${100 / cardsPerView}% - ${(cardsPerView - 1) * 12 / cardsPerView}px)` }}
               >
-                {/* Ingredient Image Placeholder */}
                 <div className="relative h-30 bg-gradient-to-br from-[#FFEDDD] to-[#FFCB69] flex items-center justify-center">
-                    <span className="text-4xl text-[#562C0C]">{ingredient.ingredient_name.charAt(0).toUpperCase()}</span>
+                  <span className="text-4xl text-[#562C0C]">{ingredient.ingredient_name.charAt(0).toUpperCase()}</span>
                 </div>
 
-                {/* Ingredient Info */}
                 <div className="p-2 flex flex-col items-center">
-                  <h3 className="text-sm font-semibold  mb-3 line-clamp-2 min-h-[2.5rem] text-center">
+                  <h3 className="text-sm font-semibold mb-3 line-clamp-2 min-h-[2.5rem] text-center">
                     {ingredient.ingredient_name}
                   </h3>
-                  
                   <button
                     onClick={() => handleViewDetail(ingredient)}
                     className="w-full py-1.5 px-2 bg-[#562C0C] text-white text-sm rounded-full hover:bg-[#3d1f08] transition-colors"
@@ -98,11 +115,10 @@ function IngredientCarousel({ ingredients }: IngredientCarouselProps) {
           </div>
         </div>
 
-        {/* Next Button */}
         {currentIndex < maxIndex && (
           <button
             onClick={handleNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-10 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 sm:translate-x-3 z-10 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors" // 👈 smaller offset on mobile
             aria-label="Next ingredients"
           >
             <ChevronRight className="w-5 h-5 text-gray-600" />
@@ -110,7 +126,6 @@ function IngredientCarousel({ ingredients }: IngredientCarouselProps) {
         )}
       </div>
 
-      {/* Indicator Dots */}
       {ingredients.length > cardsPerView && (
         <div className="flex justify-center gap-2 mt-4">
           {Array.from({ length: maxIndex + 1 }).map((_, index) => (
@@ -126,11 +141,11 @@ function IngredientCarousel({ ingredients }: IngredientCarouselProps) {
         </div>
       )}
 
-      <IngredientDetailPopup 
-        ingredient={selectedIngredient} 
-        tags={selectedIngredient ? getTags(selectedIngredient) : []} 
-        isOpen={isPopupOpen} 
-        onClose={handleClosePopup} 
+      <IngredientDetailPopup
+        ingredient={selectedIngredient}
+        tags={selectedIngredient ? getTags(selectedIngredient) : []}
+        isOpen={isPopupOpen}
+        onClose={handleClosePopup}
       />
     </div>
   );

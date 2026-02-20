@@ -29,10 +29,10 @@ function Filter({ title, category, items, onFilterChange }: FilterProps) {
       <div className="flex flex-col items-center">
         <div className="w-[85%] mb-8 flex flex-col">
           {/* Title */}
-          <h3 className="mt-5 text-2xl">{title}</h3>
+          <h3 className="mt-5 text-xl sm:text-2xl">{title}</h3>
           <hr className="mt-2 border-t-2 border-[#CDCDCD] " />
           {/* Filter Item */}
-          <div className="mt-5 grid grid-cols-3 gap-x-3.5 gap-y-5 items-center">
+          <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-x-3.5 gap-y-5 items-center">
             {firstItems.map((item) => (
               <p
                 key={item}
@@ -57,7 +57,7 @@ function Filter({ title, category, items, onFilterChange }: FilterProps) {
             `}
             >
               <div className="overflow-hidden">
-                <div className="mt-5 mb-1 grid grid-cols-3 gap-x-3.5 gap-y-5 items-center">
+                <div className="mt-5 mb-1 grid grid-cols-2 sm:grid-cols-3 gap-x-3.5 gap-y-5 items-center">
                   {remainingItems.map((item) => (
                     <p
                       key={item}

@@ -56,7 +56,7 @@ function RecipeCard({ recipes }: RecipeCardProps) {
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-12 w-full items-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-12 w-full items-start">
         {recipes.map((recipe) => (
           <div
             key={recipe.id}
@@ -67,7 +67,7 @@ function RecipeCard({ recipes }: RecipeCardProps) {
               <img
                 src={recipe.image}
                 alt={recipe.title}
-                className="w-full h-full rounded-tl-2xl rounded-tr-2xl"
+                className="w-full h-48 sm:h-56 object-cover rounded-tl-2xl rounded-tr-2xl"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.src = "/placeholder.svg";
@@ -85,7 +85,7 @@ function RecipeCard({ recipes }: RecipeCardProps) {
 
             <div className="flex flex-col items-center mt-4">
               {/* Recipe Name */}
-              <h3 className="text-[#562C0C] text-center font-medium text-2xl">
+              <h3 className="text-[#562C0C] text-center font-medium text-xl sm:text-2xl">
                 {recipe.title}
               </h3>
               {/* Tags */}

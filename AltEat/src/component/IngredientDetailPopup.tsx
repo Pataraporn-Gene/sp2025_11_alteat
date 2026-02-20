@@ -49,58 +49,61 @@ function IngredientDetailPopup({ ingredient, tags, isOpen, onClose }: Ingredient
 
   return (
     <Popup
-      open={isOpen}
-      onClose={onClose}
-      modal
-      overlayStyle={{ background: "rgba(0, 0, 0, 0.5)", backdropFilter: "blur(4px)" }}
-      contentStyle={{
-        background: "transparent",
-        border: "none",
-        width: "auto",
-        padding: 0,
-      }}
-    >
-      <div className="bg-white border-5 border-[#EDAE9B] rounded-2xl p-13  overflow-y-auto">
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-5 right-10 text-gray-400 hover:text-gray-600 text-2xl font-bold"
-          >
-            &times;
-          </button>
+    open={isOpen}
+    onClose={onClose}
+    modal
+    overlayStyle={{ background: "rgba(0, 0, 0, 0.5)", backdropFilter: "blur(4px)" }}
+    contentStyle={{
+      background: "transparent",
+      border: "none",
+      width: "90%",        
+      maxWidth: "560px",  
+      padding: 0,
+    }}
+  >
+    <div className="relative bg-white border-5 border-[#EDAE9B] rounded-2xl p-6 sm:p-13 max-h-[85vh] overflow-y-auto">
 
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h2 className="text-4xl font-extrabold text-black">
-              {ingredient.ingredient_name}
-            </h2>
-            
-            {/* Tags */}
-            <div className="mt-5 flex justify-center flex-wrap gap-2">
-              {tags?.map((tag) => (
-                <span className="px-4 py-1 bg-[#FFCB69] rounded-full text-[#694900] text-sm">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
+      {/* Close button */}
+      <button
+        onClick={onClose}
+        className="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
+      >
+        &times;
+      </button>
 
-        {/* Content */}
-        <div className="space-y-2">
-          {renderArrayField("Other Names", ingredient.has_other_names)}
-          {renderArrayField("Flavors", ingredient.has_flavor)}
-          {renderArrayField("Textures", ingredient.has_texture)}
-          {renderArrayField("Colors", ingredient.has_color)}
-          {renderArrayField("Shapes", ingredient.has_shape)}
-          {renderArrayField("Cooking Methods", ingredient.can_cook)}
-          {renderArrayField("Benefits", ingredient.has_benefit)}
-          {renderArrayField("Vitamins", ingredient.has_vitamin)}
-          {renderArrayField("Minerals", ingredient.has_mineral)}
-          {renderArrayField("Nutrients", ingredient.has_nutrient)}
+      {/* Header */}
+      <div className="text-center mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-4xl font-extrabold text-black">
+          {ingredient.ingredient_name}
+        </h2>
+
+        <div className="mt-4 flex justify-center flex-wrap gap-2">
+          {tags?.map((tag) => (
+            <span
+              key={tag}
+              className="px-3 py-1 bg-[#FFCB69] rounded-full text-[#694900] text-sm"
+            >
+              {tag}
+            </span>
+          ))}
         </div>
-
       </div>
-    </Popup>
+
+      {/* Content */}
+      <div className="space-y-2">
+        {renderArrayField("Other Names", ingredient.has_other_names)}
+        {renderArrayField("Flavors", ingredient.has_flavor)}
+        {renderArrayField("Textures", ingredient.has_texture)}
+        {renderArrayField("Colors", ingredient.has_color)}
+        {renderArrayField("Shapes", ingredient.has_shape)}
+        {renderArrayField("Cooking Methods", ingredient.can_cook)}
+        {renderArrayField("Benefits", ingredient.has_benefit)}
+        {renderArrayField("Vitamins", ingredient.has_vitamin)}
+        {renderArrayField("Minerals", ingredient.has_mineral)}
+        {renderArrayField("Nutrients", ingredient.has_nutrient)}
+      </div>
+    </div>
+  </Popup>
   )
 }
 

@@ -35,7 +35,7 @@ function IngredientCard({ ingredients }: IngredientCardProps) {
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-12 w-full items-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-12 w-full items-start">
         {ingredients.map((ingredient) => (
           <div
             key={ingredient.ingredient_id}
@@ -44,13 +44,13 @@ function IngredientCard({ ingredients }: IngredientCardProps) {
             {/* Ingredient Image Placeholder */}
             <div className="relative">
               <div className="w-full h-45 bg-gradient-to-br from-[#FFEDDD] to-[#FFCB69] flex items-center justify-center">
-                <span className="text-6xl">{ingredient.ingredient_name.charAt(0).toUpperCase()}</span>
+                <span className="text-4xl sm:text-6xl">{ingredient.ingredient_name.charAt(0).toUpperCase()}</span>
               </div>
             </div>
 
             <div className="flex flex-col items-center mt-4 px-4">
               {/* Ingredient Name */}
-              <h3 className="text-[#562C0C] font-medium text-2xl text-center">{ingredient.ingredient_name}</h3>
+              <h3 className="text-[#562C0C] font-medium text-xl sm:text-2xl text-center">{ingredient.ingredient_name}</h3>
               {/* Type */}
               <span className="text-gray-500 text-sm mt-1">{ingredient.type}</span>
               {/* Tags */}

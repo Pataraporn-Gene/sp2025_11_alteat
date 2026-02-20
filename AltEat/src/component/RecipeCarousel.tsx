@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Recipe {
   name: string;
@@ -16,7 +17,7 @@ interface RecipeCarouselProps {
 function RecipeCarousel({ recipes }: RecipeCarouselProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  
+  const {t} = useTranslation('common');
   // Calculate how many cards to show based on screen size
   const cardsPerView = 3;
   const maxIndex = Math.max(0, recipes.length - cardsPerView);
@@ -86,9 +87,9 @@ function RecipeCarousel({ recipes }: RecipeCarouselProps) {
                   
                   <button
                     onClick={() => handleViewDetail(recipe.id)}
-                    className="w-full py-2 px-3 bg-[#562C0C] text-white text-sm rounded-full hover:bg-[#3d1f08] transition-colors"
+                    className="w-full py-2 px-3 bg-[#562C0C] text-white text-sm rounded-full hover:bg-[#3d1f08] transition-colors cursor-pointer"
                   >
-                    View Detail
+                    {t('viewDetail')}
                   </button>
                 </div>
               </div>
