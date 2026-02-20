@@ -10,7 +10,7 @@ import RecipeCarousel from "../component/RecipeCarousel";
 import { useProfile } from "../context/ProfileContext";
 import IngredientCarousel from "../component/IngredientCarousel";
 import type { IngredientDetail } from "../component/IngredientDetailPopup";
-import chatbotBg from "../assets/chatbot-bg.jpg";
+import chatbotBg from "../assets/chatbot-bg.png";
 
 interface Recipe {
   name: string;
