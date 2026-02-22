@@ -219,18 +219,13 @@ function IngredientSearchpage() {
           />
           <div className="flex-1 flex justify-center">
             {/* Main Content */}
-            <div className="flex flex-col items-center mb-20 max-w-7xl w-[85%]">
-              <div className="flex items-center mb-5">
-                {/* Title */}
-                <div>
-                  <h1 className="text-5xl mb-4">
-                    {t("ingredient:search.title")}
-                  </h1>
-                  <p className="text-[16px]">
-                    {t("ingredient:search.subtitle")}
-                  </p>
+            <div className="flex flex-col items-center mb-20 max-w-7xl w-full px-4 sm:px-8">
+              <div className="flex items-center mb-5 w-full">
+                <div className="flex-1">
+                  <h1 className="text-3xl sm:text-5xl mb-3 sm:mb-4">{t("ingredient:search.title")}</h1>
+                  <p className="text-[15px] sm:text-[16px]">{t("ingredient:search.subtitle")}</p>
                 </div>
-                <img src={context || "/placeholder.svg"} />
+                <img src={context || "/placeholder.svg"} className="hidden sm:block w-32 shrink-0" />
               </div>
 
               {/* Text Input */}
@@ -252,7 +247,7 @@ function IngredientSearchpage() {
 
               {/* Card Item */}
               <div className="w-full">
-                <div className="flex flex-col items-start mt-14">
+                <div className="flex flex-col items-start mt-8 sm:mt-14">
                   {loading ? (
                     <div className="w-full flex justify-center py-12">
                       <div className="text-xl text-[#562C0C]">
@@ -261,7 +256,7 @@ function IngredientSearchpage() {
                     </div>
                   ) : !hasSearched ? (
                     <div className="w-full flex flex-col items-center justify-center py-12 text-center">
-                      <div className="text-2xl text-[#562C0C] mb-2">
+                      <div className="text-xl sm:text-2xl text-[#562C0C] mb-2">
                         {t("ingredient:search.selectFilters")}
                       </div>
                       <p className="text-gray-500">
@@ -270,7 +265,7 @@ function IngredientSearchpage() {
                     </div>
                   ) : ingredients.length === 0 ? (
                     <div className="w-full flex flex-col items-center justify-center py-12 text-center">
-                      <div className="text-2xl text-[#562C0C] mb-2">
+                      <div className="text-xl sm:text-2xl text-[#562C0C] mb-2">
                         {t("ingredient:search.noIngredientsFound")}
                       </div>
                       <p className="text-gray-500">

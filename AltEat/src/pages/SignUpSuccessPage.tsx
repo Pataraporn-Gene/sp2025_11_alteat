@@ -9,8 +9,8 @@ function SignupSuccess() {
   return (
     <>
         <Navbar />
-        <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-[#FACE9B] via-[#FFBD9E] via-60% to-[#E6896D]">
-        <div className="bg-white p-8 rounded-xl shadow text-center max-w-md">
+        <div className="min-h-screen flex items-center justify-center px-4 bg-linear-to-b from-[#FACE9B] via-[#FFBD9E] via-60% to-[#E6896D]">
+          <div className="bg-white p-8 rounded-xl shadow text-center max-w-md w-full">
             <h1 className="text-2xl font-bold text-[#ce441a] mb-4">
             {t('success.title')}
             </h1>

@@ -51,7 +51,7 @@ export default function SignUp() {
   return (
     <>
         <Navbar />
-        <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-[#FACE9B] via-[#FFBD9E] via-60% to-[#E6896D]">
+          <div className="min-h-screen flex items-center justify-center px-4 bg-linear-to-b from-[#FACE9B] via-[#FFBD9E] via-60% to-[#E6896D]">
             <div className="bg-white p-8 rounded-xl w-full max-w-md shadow">
                 <h1 className="text-2xl font-bold text-center mb-6">{t('signup.title')}</h1>
 

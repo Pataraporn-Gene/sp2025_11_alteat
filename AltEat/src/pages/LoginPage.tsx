@@ -69,7 +69,7 @@ export default function Login() {
                   {message && (
                     <div className="mt-2 p-2 bg-white rounded border border-blue-200">
                       <p className="text-xs text-gray-600 mb-1">{t('chatbotNotice.yourMessage')}</p>
-                      <p className="text-xs text-gray-800 italic">"{message}"</p>
+                      <p className="text-xs text-gray-800 italic">&ldquo;{message}&rdquo;</p>
                     </div>
                   )}
                 </div>

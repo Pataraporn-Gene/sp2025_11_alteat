@@ -91,8 +91,8 @@ function FavoritePage() {
     <div className="min-h-screen bg-[#FFEDDD]">
       <Navbar />
 
-      <div className="mt-2 flex flex-col max-w-7xl m-auto w-[60%]">
-        {isLoggedIn && <h1 className="p-8 text-5xl">{t('title')}</h1>}
+      <div className="mt-2 flex flex-col max-w-7xl mx-auto w-full px-4 sm:px-8 md:w-[75%] lg:w-[60%]">
+        {isLoggedIn && <h1 className="p-8 text-3xl sm:text-5xl">{t('title')}</h1>}
 
         <div className="mt-3 mb-20">
           {!isLoggedIn ? (
@@ -102,7 +102,7 @@ function FavoritePage() {
               <p className="text-gray-600 mb-8 max-w-md">
                 {t('saveFavoritesMessage', 'Log in or create an account to keep track of all the recipes you love, and access them anytime, anywhere.')}
               </p>
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/login" className="px-8 py-3 bg-[#e48f75] text-white font-semibold rounded-lg hover:bg-[#E6896D] transition-colors shadow-md">
                   {t('login')}
                 </Link>

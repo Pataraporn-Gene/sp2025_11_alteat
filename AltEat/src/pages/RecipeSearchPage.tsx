@@ -201,16 +201,13 @@ function RecipeSearchPage() {
 
             <div className="flex-1 flex justify-center">
               {/* Main Content */}
-              <div className="flex flex-col items-center mb-20 max-w-7xl w-[85%]">
-                <div className="flex items-center mb-5">
-                  {/* Title */}
-                  <div>
-                    <h1 className="text-5xl mb-4">{t('recipe:search.title')}</h1>
-                    <p className="text-[16px]">
-                      {t('recipe:search.subtitle')}
-                    </p>
+              <div className="flex flex-col items-center mb-20 max-w-7xl w-full px-4 sm:px-8">
+                <div className="flex items-center mb-5 w-full">
+                  <div className="flex-1">
+                    <h1 className="text-3xl sm:text-5xl mb-3 sm:mb-4">{t('recipe:search.title')}</h1>
+                    <p className="text-[15px] sm:text-[16px]">{t('recipe:search.subtitle')}</p>
                   </div>
-                  <img src={recipe_img} alt="Recipe" />
+                  <img src={recipe_img} alt="Recipe" className="hidden sm:block w-32 shrink-0" />
                 </div>
 
                 {/* Text Input */}
@@ -233,7 +230,7 @@ function RecipeSearchPage() {
 
                 {/* Card Item */}
                 <div className="w-full">
-                  <h3 className="my-7 text-2xl">
+                  <h3 className="my-5 sm:my-7 text-xl sm:text-2xl">
                     {hasSearched
                       ? t('recipe:search.youCanMake', { count: recipes.length })
                       : ""}
@@ -245,12 +242,12 @@ function RecipeSearchPage() {
                       </div>
                     ) : !hasSearched ? (
                       <div className="w-full flex flex-col items-center justify-center py-12 text-center">
-                        <div className="text-2xl text-[#562C0C] mb-2">{t('recipe:search.selectFilters')}</div>
+                        <div className="text-xl sm:text-2xl text-[#562C0C] mb-2">{t('recipe:search.selectFilters')}</div>
                         <p className="text-gray-500">{t('recipe:search.useFilters')}</p>
                       </div>
                     ) : recipes.length === 0 ? (
                       <div className="w-full flex flex-col items-center justify-center py-12 text-center">
-                        <div className="text-2xl text-[#562C0C] mb-2">{t('recipe:search.noRecipesFound')}</div>
+                        <div className="text-xl sm:text-2xl text-[#562C0C] mb-2">{t('recipe:search.noRecipesFound')}</div>
                         <p className="text-gray-500">{t('recipe:search.adjustFilters')}</p>
                       </div>
                     ) : (

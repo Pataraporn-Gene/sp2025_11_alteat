@@ -59,6 +59,8 @@ function ChatbotPage() {
   const [initialMessageSent, setInitialMessageSent] = useState(false);
   const { profile } = useProfile();
   const isLoggedIn = !!profile;
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
 
   const generateId = () =>
     Date.now().toString() + Math.random().toString(36).substr(2, 9);
@@ -503,11 +505,21 @@ function ChatbotPage() {
       }}
     >
       <Navbar />
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen relative">
+        {/* Mobile sidebar backdrop */}
+        {mobileSidebarOpen && (
+          <div
+            className="fixed inset-0 z-40 bg-black/40 md:hidden"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+        )}
         {/* Sidebar */}
-        <aside
-          className={`bg-white border-r transition-all duration-300 flex flex-col ${isSidebarOpen ? "w-64" : "w-14"}`}
-        >
+        <aside className={`
+          fixed md:relative z-50 md:z-auto h-full bg-white border-r
+          transition-all duration-300 flex flex-col
+          ${mobileSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+          ${isSidebarOpen ? "w-64" : "md:w-14 w-64"}
+        `}>
           {/* Header */}
           <div className="flex items-center justify-between px-3 py-3">
             {isSidebarOpen && (
@@ -621,11 +633,17 @@ function ChatbotPage() {
         </aside>
 
         {/* Chat Area */}
-        <main className="flex-1 flex items-center justify-center p-6">
-          <div className="w-full max-w-3xl h-full max-h-[90vh] bg-white rounded-3xl shadow-xl flex flex-col p-6">
+        <main className="flex-1 flex items-center justify-center p-3 sm:p-6">
+          <button
+            onClick={() => setMobileSidebarOpen(true)}
+            className="md:hidden absolute top-20 left-3 z-30 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center"
+          >
+            ⟩
+          </button>
+          <div className="w-full max-w-3xl h-full max-h-[90vh] bg-white rounded-3xl shadow-xl flex flex-col p-3 sm:p-6">
             {/* Welcome Card - show only when no messages */}
             {messages.length === 0 && (
-              <div className="bg-gray-50 rounded-2xl p-5 mb-6">
+              <div className="bg-gray-50 rounded-2xl p-3 sm:p-5 mb-4 sm:mb-6">
                 <h1 className="font-semibold text-lg mb-1">
                   {t("greeting.title")}
                 </h1>
@@ -667,7 +685,7 @@ function ChatbotPage() {
                   )}
 
                   <div
-                    className={`max-w-[70%] ${
+                    className={`max-w-[85%] sm:max-w-[70%] ${
                       msg.role === "user"
                         ? "flex flex-col items-end"
                         : "flex flex-col items-start"

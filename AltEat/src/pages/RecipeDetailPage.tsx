@@ -137,7 +137,7 @@ export default function RecipeDetailPage() {
       <Navbar />
 
       <div className="flex relative">
-        <main className="flex-1 p-8 max-w-3xl mx-auto overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-8 max-w-3xl mx-auto overflow-y-auto">
           {/* Title */}
           <div className="flex gap-x-5 justify-center items-center relative">
             <button
@@ -146,7 +146,7 @@ export default function RecipeDetailPage() {
             >
               <ArrowLeft className="w-6 h-6" />
             </button>
-            <h1 className="font-(family-name:Alexandria) text-4xl font-bold text-center text-[#040404]">
+            <h1 className="font-(family-name:Alexandria) text-2xl sm:text-4xl font-bold text-center text-[#040404]">
               {recipe.recipe_name}
             </h1>
             <FavoriteButton
@@ -204,9 +204,9 @@ export default function RecipeDetailPage() {
           )}
 
           {/* Image and Ingredients */}
-          <div className="flex gap-6 mb-10">
+          <div className="flex flex-col md:flex-row gap-6 mb-10">
             {recipe.img_src && (
-              <div className="w-full md:w-72 h-64 rounded-lg overflow-hidden flex-shrink-0">
+              <div className="w-full md:w-72 h-48 sm:h-64 rounded-lg overflow-hidden flex-shrink-0">
                 <img
                   src={recipe.img_src}
                   alt={recipe.recipe_name}
@@ -267,8 +267,36 @@ export default function RecipeDetailPage() {
           )}
         </main>
 
+        {/* Mobile recommended — shown only when sidebar is hidden */}
+        <div className="lg:hidden mt-10 mb-10">
+          <h2 className="text-xl font-semibold text-black mb-6">{t('detail.recommended')}</h2>
+          {!recommendedLoading && recommendedRecipes.length > 0 && (
+            <div className="grid grid-cols-2 gap-4">
+              {recommendedRecipes.slice(0, 4).map((recipeItem) => {
+                return (
+                  <Link
+                    key={recipeItem.id}
+                    to={`/recipe/${recipeItem.id}`}
+                    className="block bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                  >
+                    <img
+                      src={recipeItem.img_src}
+                      alt={recipeItem.recipe_name}
+                      className="w-full h-32 object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
+                    />
+                    <div className="p-2 text-center">
+                      <h3 className="font-semibold text-xs text-[#040404] line-clamp-2">{recipeItem.recipe_name}</h3>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         {/* Right Sidebar - Recommended Recipes */}
-        <aside className="w-80 p-6 border-l border-gray-200 sticky top-0 h-screen overflow-y-auto flex-shrink-0 bg-[#F5F5F5]">
+        <aside className="hidden lg:block w-80 p-6 border-l border-gray-200 sticky top-0 h-screen overflow-y-auto flex-shrink-0 bg-[#F5F5F5]">
           <h2 className="text-xl font-semibold text-black mb-6">
             {t('detail.recommended')}
           </h2>
