@@ -265,35 +265,37 @@ export default function RecipeDetailPage() {
               </div>
             </div>
           )}
-        </main>
+        
 
-        {/* Mobile recommended — shown only when sidebar is hidden */}
-        <div className="lg:hidden mt-10 mb-10">
-          <h2 className="text-xl font-semibold text-black mb-6">{t('detail.recommended')}</h2>
-          {!recommendedLoading && recommendedRecipes.length > 0 && (
-            <div className="grid grid-cols-2 gap-4">
-              {recommendedRecipes.slice(0, 4).map((recipeItem) => {
-                return (
-                  <Link
-                    key={recipeItem.id}
-                    to={`/recipe/${recipeItem.id}`}
-                    className="block bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
-                  >
-                    <img
-                      src={recipeItem.img_src}
-                      alt={recipeItem.recipe_name}
-                      className="w-full h-32 object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
-                    />
-                    <div className="p-2 text-center">
-                      <h3 className="font-semibold text-xs text-[#040404] line-clamp-2">{recipeItem.recipe_name}</h3>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </div>
+          {/* Mobile recommended — shown only when sidebar is hidden */}
+          <div className="lg:hidden mt-10 mb-10">
+            <h2 className="text-xl font-semibold text-black mb-6">{t('detail.recommended')}</h2>
+            {!recommendedLoading && recommendedRecipes.length > 0 && (
+              <div className="grid grid-cols-2 gap-4">
+                {recommendedRecipes.slice(0, 4).map((recipeItem) => {
+                  return (
+                    <Link
+                      key={recipeItem.id}
+                      to={`/recipe/${recipeItem.id}`}
+                      className="block bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                    >
+                      <img
+                        src={recipeItem.img_src}
+                        alt={recipeItem.recipe_name}
+                        className="w-full h-32 object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
+                      />
+                      <div className="p-2 text-center">
+                        <h3 className="font-semibold text-xs text-[#040404] line-clamp-2">{recipeItem.recipe_name}</h3>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+        </main>
 
         {/* Right Sidebar - Recommended Recipes */}
         <aside className="hidden lg:block w-80 p-6 border-l border-gray-200 sticky top-0 h-screen overflow-y-auto flex-shrink-0 bg-[#F5F5F5]">

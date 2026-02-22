@@ -22,7 +22,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50">
+    <nav className="sticky top-0 z-50 relative">
       {/* Main bar */}
       <div className="h-16 bg-[#FFF3DB] flex justify-between items-center px-4 sm:px-8">
         
@@ -104,7 +104,7 @@ function Navbar() {
 
       {/* Mobile dropdown menu */}
       {menuOpen && (
-        <div className="md:hidden bg-[#FFF3DB] border-t border-[#f0d9a0] flex flex-col px-6 py-4 gap-4 text-[18px]">
+          <div className="md:hidden absolute top-16 left-0 right-0 z-50 bg-[#FFF3DB] border-t border-[#f0d9a0] flex flex-col px-6 py-4 gap-4 text-[18px] shadow-lg">
           <Link to="/aboutus" onClick={() => setMenuOpen(false)} className="hover:text-[#ce441a] transition-colors">
             {t('aboutUs')}
           </Link>

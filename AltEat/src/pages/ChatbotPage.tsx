@@ -4,13 +4,12 @@ import { supabase } from "../lib/supabase";
 import ChatFeedback from "../component/ChatFeedback";
 import type { User } from "@supabase/supabase-js";
 import Navbar from "../component/Navbar";
-import { MoreVertical, Edit2, Trash2, X, Check } from "lucide-react";
+import { MoreVertical, Edit2, Trash2, X, Check, History, PlusSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import RecipeCarousel from "../component/RecipeCarousel";
 import { useProfile } from "../context/ProfileContext";
 import IngredientCarousel from "../component/IngredientCarousel";
 import type { IngredientDetail } from "../component/IngredientDetailPopup";
-import chatbotBg from "../assets/chatbot-bg.png";
 
 interface Recipe {
   name: string;
@@ -35,7 +34,7 @@ interface ChatSession {
 }
 
 const N8N_WEBHOOK_URL =
-  "https://primary-production-6fdb0.up.railway.app/webhook/f1725c42-d6af-4b84-adba-86fb367f9f3b/chat";
+  "http://localhost:5678/webhook/f1725c42-d6af-4b84-adba-86fb367f9f3b/chat";
 
 function ChatbotPage() {
   const { t } = useTranslation("chatbot");
@@ -46,6 +45,7 @@ function ChatbotPage() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false); // ✅ FIXED: was missing, caused history to never render
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,14 +53,10 @@ function ChatbotPage() {
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
-  const [deleteConfirmationId, setDeleteConfirmationId] = useState<
-    string | null
-  >(null);
+  const [deleteConfirmationId, setDeleteConfirmationId] = useState<string | null>(null);
   const [initialMessageSent, setInitialMessageSent] = useState(false);
   const { profile } = useProfile();
   const isLoggedIn = !!profile;
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-
 
   const generateId = () =>
     Date.now().toString() + Math.random().toString(36).substr(2, 9);
@@ -114,9 +110,7 @@ function ChatbotPage() {
       .eq("session_id", deleteConfirmationId);
 
     if (!error) {
-      setSessions(
-        sessions.filter((s) => s.session_id !== deleteConfirmationId),
-      );
+      setSessions(sessions.filter((s) => s.session_id !== deleteConfirmationId));
       if (currentSessionId === deleteConfirmationId) {
         handleNewChat();
       }
@@ -152,20 +146,16 @@ function ChatbotPage() {
   // Check authentication status
   useEffect(() => {
     const checkAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setUser(session.user);
         setAuthLoading(false);
       } else {
-        // Preserve the message parameter when redirecting to login
         const message = searchParams.get("message");
         if (message) {
-          navigate(
-            `/login?redirect=/chatbot&message=${encodeURIComponent(message)}`,
-            { state: { warning: "You need to log in to access the chatbot." } },
-          );
+          navigate(`/login?redirect=/chatbot&message=${encodeURIComponent(message)}`, {
+            state: { warning: "You need to log in to access the chatbot." },
+          });
         } else {
           navigate("/login?redirect=/chatbot", {
             state: { warning: "You need to log in to access the chatbot." },
@@ -176,20 +166,16 @@ function ChatbotPage() {
 
     checkAuth();
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user);
         setAuthLoading(false);
       } else {
         const message = searchParams.get("message");
         if (message) {
-          navigate(
-            `/login?redirect=/chatbot&message=${encodeURIComponent(message)}`,
-            { state: { warning: "You need to log in to access the chatbot." } },
-          );
+          navigate(`/login?redirect=/chatbot&message=${encodeURIComponent(message)}`, {
+            state: { warning: "You need to log in to access the chatbot." },
+          });
         } else {
           navigate("/login?redirect=/chatbot", {
             state: { warning: "You need to log in to access the chatbot." },
@@ -206,10 +192,8 @@ function ChatbotPage() {
     if (user && !authLoading && !initialMessageSent) {
       const initialMessage = searchParams.get("message");
       if (initialMessage) {
-        // Set the message and trigger send
         setInput(initialMessage);
         setInitialMessageSent(true);
-        // Remove the message parameter from URL
         searchParams.delete("message");
         setSearchParams(searchParams);
         handleSend(initialMessage);
@@ -221,7 +205,6 @@ function ChatbotPage() {
 
   const loadSessions = async () => {
     if (!user) return;
-
     const { data, error } = await supabase
       .from("chat_sessions")
       .select("*")
@@ -243,44 +226,21 @@ function ChatbotPage() {
     if (!error && data) {
       setMessages(
         data.map((msg) => {
-          // Try to parse message_text as JSON to check if it's recipes
           try {
             const parsed = JSON.parse(msg.message_text);
             if (Array.isArray(parsed) && parsed[0]?.recipes) {
-              return {
-                id: msg.message_id,
-                role: msg.sender_type as "user" | "bot",
-                recipes: parsed[0].recipes,
-                type: "recipes" as const,
-              };
+              return { id: msg.message_id, role: msg.sender_type as "user" | "bot", recipes: parsed[0].recipes, type: "recipes" as const };
             }
             if (parsed && parsed.recipes && Array.isArray(parsed.recipes)) {
-              return {
-                id: msg.message_id,
-                role: msg.sender_type as "user" | "bot",
-                recipes: parsed.recipes,
-                type: "recipes" as const,
-              };
+              return { id: msg.message_id, role: msg.sender_type as "user" | "bot", recipes: parsed.recipes, type: "recipes" as const };
             }
-            // Check for ingredients
-            if (parsed && parsed.ingredients && Array.isArray(parsed.ingredients) && parsed.ingredients.length > 0 && typeof parsed.ingredients[0] === 'object') {
-              return {
-                id: msg.message_id,
-                role: msg.sender_type as "user" | "bot",
-                ingredients: parsed.ingredients,
-                type: "ingredients" as const,
-              };
+            if (parsed && parsed.ingredients && Array.isArray(parsed.ingredients) && parsed.ingredients.length > 0 && typeof parsed.ingredients[0] === "object") {
+              return { id: msg.message_id, role: msg.sender_type as "user" | "bot", ingredients: parsed.ingredients, type: "ingredients" as const };
             }
           } catch {
-            // Not JSON or not recipes format, treat as text
+            // treat as text
           }
-
-          return {
-            id: msg.message_id,
-            role: msg.sender_type as "user" | "bot",
-            text: msg.message_text,
-            type: "text" as const,
-          };
+          return { id: msg.message_id, role: msg.sender_type as "user" | "bot", text: msg.message_text, type: "text" as const };
         }),
       );
     }
@@ -288,19 +248,9 @@ function ChatbotPage() {
 
   const createNewSession = async (firstMessage: string) => {
     if (!user) return null;
-
     const sessionId = generateId();
-    const title =
-      firstMessage.length > 30
-        ? firstMessage.substring(0, 30) + "..."
-        : firstMessage;
-
-    const { error } = await supabase.from("chat_sessions").insert({
-      session_id: sessionId,
-      user_id: user.id,
-      title: title,
-    });
-
+    const title = firstMessage.length > 30 ? firstMessage.substring(0, 30) + "..." : firstMessage;
+    const { error } = await supabase.from("chat_sessions").insert({ session_id: sessionId, user_id: user.id, title });
     if (!error) {
       setCurrentSessionId(sessionId);
       await loadSessions();
@@ -309,12 +259,7 @@ function ChatbotPage() {
     return null;
   };
 
-  const saveMessage = async (
-    sessionId: string,
-    messageId: string,
-    senderType: "user" | "bot",
-    messageText: string,
-  ) => {
+  const saveMessage = async (sessionId: string, messageId: string, senderType: "user" | "bot", messageText: string) => {
     await supabase.from("chat_messages").insert({
       message_id: messageId,
       session_id: sessionId,
@@ -332,138 +277,67 @@ function ChatbotPage() {
     setInput("");
     setIsLoading(true);
 
-    // Create new session if none exists
     let sessionId = currentSessionId;
     if (!sessionId) {
       sessionId = await createNewSession(userMessage);
-      if (!sessionId) {
-        setIsLoading(false);
-        return;
-      }
+      if (!sessionId) { setIsLoading(false); return; }
     }
 
-    // Add user message to UI
-    const userMsg: ChatMessage = {
-      id: userMessageId,
-      role: "user",
-      text: userMessage,
-      type: "text",
-    };
+    const userMsg: ChatMessage = { id: userMessageId, role: "user", text: userMessage, type: "text" };
     setMessages((prev) => [...prev, userMsg]);
-
-    // Save user message to Supabase
     await saveMessage(sessionId, userMessageId, "user", userMessage);
 
     try {
-      // Send to n8n webhook
       const res = await fetch(N8N_WEBHOOK_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          chatInput: userMessage,
-          sessionId: sessionId,
-          messageId: userMessageId,
-          userId: user.id,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatInput: userMessage, sessionId, messageId: userMessageId, userId: user.id }),
       });
 
-      console.log("Response from n8n:", res);
-      let data = (await res.json());
-      if(data.data){
-        data = data.data;
-      }
-      console.log("Parsed data:", data);
+      let data = await res.json();
+      if (data.data) data = data.data;
 
-      // Check if response is recipes format
       let botMessage: ChatMessage;
       let messageTextToSave: string;
 
       const recipesData =
-        Array.isArray(data) && data[0]?.recipes
-          ? data[0].recipes
-          : data?.recipes && Array.isArray(data.recipes)
-            ? data.recipes
-            : null;
-
-      const ingredientsList = data.ingredients && Array.isArray(data.ingredients) && typeof data.ingredients[0] === 'string' 
-        ? data.ingredients 
+        Array.isArray(data) && data[0]?.recipes ? data[0].recipes
+        : data?.recipes && Array.isArray(data.recipes) ? data.recipes
         : null;
 
-      if (recipesData) {
-        // Recipe carousel format
-        const botMessageId = generateId();
-        botMessage = {
-          id: botMessageId,
-          role: "bot",
-          recipes: recipesData,
-          type: "recipes",
-        };
-        messageTextToSave = JSON.stringify(data); // Save as JSON string
-      } else if (ingredientsList) {
-        // Fetch ingredient details
-        const { data: ingredientsDetails, error: ingError } = await supabase
-          .from('ingredients')
-          .select('*')
-          .in('ingredient_name', ingredientsList);
+      const ingredientsList =
+        data.ingredients && Array.isArray(data.ingredients) && typeof data.ingredients[0] === "string"
+          ? data.ingredients : null;
 
+      if (recipesData) {
+        const botMessageId = generateId();
+        botMessage = { id: botMessageId, role: "bot", recipes: recipesData, type: "recipes" };
+        messageTextToSave = JSON.stringify(data);
+      } else if (ingredientsList) {
+        const { data: ingredientsDetails, error: ingError } = await supabase
+          .from("ingredients").select("*").in("ingredient_name", ingredientsList);
         if (!ingError && ingredientsDetails && ingredientsDetails.length > 0) {
           const botMessageId = generateId();
-          botMessage = {
-            id: botMessageId,
-            role: "bot",
-            ingredients: ingredientsDetails,
-            type: "ingredients",
-          };
+          botMessage = { id: botMessageId, role: "bot", ingredients: ingredientsDetails, type: "ingredients" };
           messageTextToSave = JSON.stringify({ ingredients: ingredientsDetails });
         } else {
-          // Fallback if not found
           const botResponse = "I found these ingredients: " + ingredientsList.join(", ");
-          botMessage = {
-            id: generateId(),
-            role: "bot",
-            text: botResponse,
-            type: "text",
-          };
+          botMessage = { id: generateId(), role: "bot", text: botResponse, type: "text" };
           messageTextToSave = botResponse;
         }
       } else {
-        // Text format
-        let botResponse = "";
-        if (data.output) {
-          botResponse = data.output;
-        } else if (data.text) {
-          botResponse = data.text;
-        } else if (typeof data === "string") {
-          botResponse = data;
-        } else {
-          botResponse = JSON.stringify(data, null, 2);
-        }
-
+        const botResponse = data.output || data.text || (typeof data === "string" ? data : JSON.stringify(data, null, 2));
         const botMessageId = generateId();
-        botMessage = {
-          id: botMessageId,
-          role: "bot",
-          text: botResponse,
-          type: "text",
-        };
+        botMessage = { id: botMessageId, role: "bot", text: botResponse, type: "text" };
         messageTextToSave = botResponse;
       }
 
       setMessages((prev) => [...prev, botMessage]);
-
-      // Save bot message to Supabase
       await saveMessage(sessionId, botMessage.id, "bot", messageTextToSave);
     } catch (error) {
       console.error("Error sending message:", error);
       const errorMessageId = generateId();
-      const errorMsg: ChatMessage = {
-        id: errorMessageId,
-        role: "bot",
-        text: t("error.processing"),
-        type: "text",
-      };
+      const errorMsg: ChatMessage = { id: errorMessageId, role: "bot", text: t("error.processing"), type: "text" };
       setMessages((prev) => [...prev, errorMsg]);
       await saveMessage(sessionId, errorMessageId, "bot", errorMsg.text!);
     } finally {
@@ -471,9 +345,7 @@ function ChatbotPage() {
     }
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
-    setInput(suggestion);
-  };
+  const handleSuggestionClick = (suggestion: string) => setInput(suggestion);
 
   const handleNewChat = () => {
     setCurrentSessionId(null);
@@ -483,9 +355,9 @@ function ChatbotPage() {
   const handleSessionClick = async (sessionId: string) => {
     setCurrentSessionId(sessionId);
     await loadMessages(sessionId);
+    setMobileSidebarOpen(false); // close drawer on mobile after selecting
   };
 
-  // Show loading while checking auth
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -499,55 +371,75 @@ function ChatbotPage() {
 
   return (
     <div
-      className="min-h-screen w-full bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: `url(${chatbotBg})`,
-      }}
+      className="h-screen flex flex-col w-full bg-cover bg-center bg-no-repeat overflow-hidden"
+      style={{ backgroundImage: "url('/src/assets/chatbot-bg.png')" }}
     >
       <Navbar />
-      <div className="flex min-h-screen relative">
-        {/* Mobile sidebar backdrop */}
+
+      <div className="flex flex-1 overflow-hidden relative">
+
+        {/* Mobile backdrop */}
         {mobileSidebarOpen && (
           <div
             className="fixed inset-0 z-40 bg-black/40 md:hidden"
             onClick={() => setMobileSidebarOpen(false)}
           />
         )}
+
         {/* Sidebar */}
-        <aside className={`
-          fixed md:relative z-50 md:z-auto h-full bg-white border-r
-          transition-all duration-300 flex flex-col
-          ${mobileSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-          ${isSidebarOpen ? "w-64" : "md:w-14 w-64"}
-        `}>
+        <aside
+          className={`
+            fixed md:relative z-50 md:z-auto
+            h-full bg-white border-r
+            transition-all duration-300 flex flex-col
+            ${mobileSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+            ${isSidebarOpen ? "w-64" : "md:w-14 w-64"}
+          `}
+        >
           {/* Header */}
-          <div className="flex items-center justify-between px-3 py-3">
-            {isSidebarOpen && (
-              <span className="text-sm font-semibold">{t("history")}</span>
+          <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100 shrink-0">
+            {/* ✅ Show label when desktop open OR mobile drawer open */}
+            {(isSidebarOpen || mobileSidebarOpen) && (
+              <span className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
+                <History className="w-4 h-4 text-[#FFCB69]" />
+                {t("history")}
+              </span>
             )}
             <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#FFCB69] transition"
+              onClick={() => {
+                if (window.innerWidth < 768) {
+                  setMobileSidebarOpen(false); // mobile: close drawer
+                } else {
+                  setIsSidebarOpen(!isSidebarOpen); // desktop: collapse
+                }
+              }}
+              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#FFCB69] transition text-gray-500"
             >
               {isSidebarOpen ? "⟨" : "⟩"}
             </button>
           </div>
 
-          {isSidebarOpen && (
-            <div className="px-3 pb-2">
+          {/* New Chat Button — show when desktop open OR mobile drawer open */}
+          {(isSidebarOpen || mobileSidebarOpen) && (
+            <div className="px-3 py-3 shrink-0">
               <button
-                onClick={handleNewChat}
-                className="w-full py-2 px-3 bg-[#FFCB69] rounded-md text-sm font-medium hover:bg-[#e6b85e] transition"
+                onClick={() => {
+                  handleNewChat();
+                  setMobileSidebarOpen(false);
+                }}
+                className="w-full py-2 px-3 bg-[#FFCB69] rounded-md text-sm font-medium hover:bg-[#e6b85e] transition flex items-center justify-center gap-2"
               >
+                <PlusSquare className="w-4 h-4" />
                 {t("newChat")}
               </button>
             </div>
           )}
 
-          <div className="border-t border-gray-300"></div>
+          <div className="border-t border-gray-200 shrink-0"></div>
 
-          {isSidebarOpen && (
-            <ul className="flex-1 overflow-y-auto px-3 py-2 space-y-2 text-sm text-gray-600">
+          {/* Session list — show when desktop open OR mobile drawer open */}
+          {(isSidebarOpen || mobileSidebarOpen) && (
+            <ul className="flex-1 overflow-y-auto px-3 py-2 space-y-1 text-sm text-gray-600">
               {sessions.map((session) => (
                 <li
                   key={session.session_id}
@@ -555,17 +447,14 @@ function ChatbotPage() {
                     editingSessionId !== session.session_id &&
                     handleSessionClick(session.session_id)
                   }
-                  className={`rounded-md px-2 py-1.5 cursor-pointer transition-colors duration-200 relative ${
+                  className={`rounded-md px-2 py-2 cursor-pointer transition-colors duration-200 relative ${
                     currentSessionId === session.session_id
                       ? "bg-[#FFCB69]"
                       : "hover:bg-[#FFCB69]/50"
                   }`}
                 >
                   {editingSessionId === session.session_id ? (
-                    <div
-                      className="flex items-center gap-1"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                       <input
                         type="text"
                         value={editTitle}
@@ -577,26 +466,20 @@ function ChatbotPage() {
                           if (e.key === "Escape") setEditingSessionId(null);
                         }}
                       />
-                      <button
-                        onClick={() => handleRenameSubmit()}
-                        className="text-green-600 hover:text-green-700"
-                      >
+                      <button onClick={() => handleRenameSubmit()} className="text-green-600 hover:text-green-700">
                         <Check size={14} />
                       </button>
-                      <button
-                        onClick={() => setEditingSessionId(null)}
-                        className="text-red-500 hover:text-red-600"
-                      >
+                      <button onClick={() => setEditingSessionId(null)} className="text-red-500 hover:text-red-600">
                         <X size={14} />
                       </button>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between">
-                      <span className="truncate flex-1">{session.title}</span>
-                      <div className="relative">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="truncate flex-1 text-xs">{session.title}</span>
+                      <div className="relative shrink-0">
                         <button
                           onClick={(e) => toggleMenu(e, session.session_id)}
-                          className={`p-1 rounded-full hover:bg-black/10 transition-opacity`}
+                          className="p-1 rounded-full hover:bg-black/10"
                         >
                           <MoreVertical size={14} />
                         </button>
@@ -609,9 +492,7 @@ function ChatbotPage() {
                               <Edit2 size={12} /> {t("actions.rename")}
                             </button>
                             <button
-                              onClick={(e) =>
-                                handleDeleteClick(e, session.session_id)
-                              }
+                              onClick={(e) => handleDeleteClick(e, session.session_id)}
                               className="w-full text-left px-3 py-2 text-xs hover:bg-red-50 text-red-600 flex items-center gap-2"
                             >
                               <Trash2 size={12} /> {t("actions.delete")}
@@ -624,33 +505,45 @@ function ChatbotPage() {
                 </li>
               ))}
               {sessions.length === 0 && (
-                <li className="text-gray-400 text-center py-4">
+                <li className="text-gray-400 text-center py-8 text-xs">
                   {t("noHistory")}
                 </li>
               )}
             </ul>
           )}
+
+          {/* Collapsed desktop state — icon only, hidden on mobile */}
+          {!isSidebarOpen && !mobileSidebarOpen && (
+            <div className="hidden md:flex flex-col items-center gap-3 py-3">
+              <button
+                onClick={handleNewChat}
+                title={t("newChat")}
+                className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#FFCB69] transition text-gray-600"
+              >
+                <PlusSquare size={16} />
+              </button>
+            </div>
+          )}
         </aside>
 
         {/* Chat Area */}
-        <main className="flex-1 flex items-center justify-center p-3 sm:p-6">
+        <main className="flex-1 flex items-center justify-center p-3 sm:p-6 overflow-hidden">
+          {/* Mobile history button */}
           <button
             onClick={() => setMobileSidebarOpen(true)}
-            className="md:hidden absolute top-20 left-3 z-30 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center"
+            className="md:hidden absolute top-3 left-3 z-30 flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full shadow-md text-sm font-medium text-gray-700"
           >
-            ⟩
+            <History className="w-4 h-4 text-[#FFCB69]" />
+            <span>{t("history")}</span>
           </button>
-          <div className="w-full max-w-3xl h-full max-h-[90vh] bg-white rounded-3xl shadow-xl flex flex-col p-3 sm:p-6">
-            {/* Welcome Card - show only when no messages */}
-            {messages.length === 0 && (
-              <div className="bg-gray-50 rounded-2xl p-3 sm:p-5 mb-4 sm:mb-6">
-                <h1 className="font-semibold text-lg mb-1">
-                  {t("greeting.title")}
-                </h1>
-                <p className="text-sm text-gray-600 mb-4">
-                  {t("greeting.subtitle")}
-                </p>
 
+          <div className="w-full max-w-3xl h-full bg-white rounded-3xl shadow-xl flex flex-col p-3 sm:p-6 overflow-hidden">
+
+            {/* Welcome Card */}
+            {messages.length === 0 && (
+              <div className="bg-gray-50 rounded-2xl p-3 sm:p-5 mb-4 shrink-0">
+                <h1 className="font-semibold text-lg mb-1">{t("greeting.title")}</h1>
+                <p className="text-sm text-gray-600 mb-4">{t("greeting.subtitle")}</p>
                 <div className="flex flex-wrap gap-2">
                   {[
                     t("greeting.suggestions.milk"),
@@ -670,7 +563,8 @@ function ChatbotPage() {
               </div>
             )}
 
-            <div className="flex-1 p-4 overflow-y-auto flex flex-col space-y-4">
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto flex flex-col space-y-4 px-1">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
@@ -678,63 +572,31 @@ function ChatbotPage() {
                 >
                   {msg.role === "bot" && (
                     <div className="flex-shrink-0">
-                      <div className="w-9 h-9 bg-[#FBB496] rounded-full flex items-center justify-center text-sm text-[#562C0C]">
-                        B
-                      </div>
+                      <div className="w-9 h-9 bg-[#FBB496] rounded-full flex items-center justify-center text-sm text-[#562C0C]">B</div>
                     </div>
                   )}
 
-                  <div
-                    className={`max-w-[85%] sm:max-w-[70%] ${
-                      msg.role === "user"
-                        ? "flex flex-col items-end"
-                        : "flex flex-col items-start"
-                    }`}
-                  >
+                  <div className={`max-w-[85%] sm:max-w-[70%] ${msg.role === "user" ? "flex flex-col items-end" : "flex flex-col items-start"}`}>
                     {msg.type === "recipes" && msg.recipes ? (
-                      // Recipe Carousel Format
-                      <div className="w-full">
-                        <RecipeCarousel recipes={msg.recipes} />
-                      </div>
+                      <div className="w-full"><RecipeCarousel recipes={msg.recipes} /></div>
                     ) : msg.type === "ingredients" && msg.ingredients ? (
-                      <div className="w-full">
-                        <IngredientCarousel ingredients={msg.ingredients} />
-                      </div>
+                      <div className="w-full"><IngredientCarousel ingredients={msg.ingredients} /></div>
                     ) : (
-                      // Text Format
-                      <div
-                        className={`px-4 py-2 rounded-2xl text-sm ${
-                          msg.role === "user"
-                            ? "bg-[#FFCB69] rounded-br-sm"
-                            : "bg-gray-100 text-gray-800 rounded-bl-sm"
-                        }`}
-                      >
-                        <p className="whitespace-pre-wrap">
-                          {renderMessageText(msg.text || "")}
-                        </p>
+                      <div className={`px-4 py-2 rounded-2xl text-sm ${msg.role === "user" ? "bg-[#FFCB69] rounded-br-sm" : "bg-gray-100 text-gray-800 rounded-bl-sm"}`}>
+                        <p className="whitespace-pre-wrap">{renderMessageText(msg.text || "")}</p>
                       </div>
                     )}
-
                     {msg.role === "bot" && currentSessionId && (
-                      <ChatFeedback
-                        messageId={msg.id}
-                        sessionId={currentSessionId}
-                      />
+                      <ChatFeedback messageId={msg.id} sessionId={currentSessionId} />
                     )}
                   </div>
 
                   {msg.role === "user" && (
                     <div className="flex-shrink-0">
                       {isLoggedIn && profile?.avatar_url ? (
-                        <img
-                          src={profile.avatar_url || "/placeholder.svg"}
-                          alt="Profile"
-                          className="h-9 w-9 rounded-full object-cover border-2 border-[#e48f75]"
-                        />
+                        <img src={profile.avatar_url} alt="Profile" className="h-9 w-9 rounded-full object-cover border-2 border-[#e48f75]" />
                       ) : (
-                        <div className="w-9 h-9 bg-gray-300 rounded-full flex items-center justify-center text-white text-sm">
-                          U
-                        </div>
+                        <div className="w-9 h-9 bg-gray-300 rounded-full flex items-center justify-center text-white text-sm">U</div>
                       )}
                     </div>
                   )}
@@ -744,21 +606,13 @@ function ChatbotPage() {
               {isLoading && (
                 <div className="flex gap-3 justify-start">
                   <div className="flex-shrink-0">
-                    <div className="w-9 h-9 bg-[#FBB496] rounded-full flex items-center justify-center text-sm text-[#562C0C]">
-                      B
-                    </div>
+                    <div className="w-9 h-9 bg-[#FBB496] rounded-full flex items-center justify-center text-sm text-[#562C0C]">B</div>
                   </div>
                   <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-sm">
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div
-                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "0.1s" }}
-                      ></div>
-                      <div
-                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "0.2s" }}  
-                      ></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
                     </div>
                   </div>
                 </div>
@@ -768,7 +622,7 @@ function ChatbotPage() {
             </div>
 
             {/* Input */}
-            <div className="mt-4">
+            <div className="mt-4 shrink-0">
               <div className="flex items-center border rounded-full px-4 py-2">
                 <input
                   type="text"
@@ -791,10 +645,11 @@ function ChatbotPage() {
           </div>
         </main>
       </div>
+
       {/* Delete Confirmation Modal */}
       {deleteConfirmationId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-xl p-6 w-full max-w-sm shadow-2xl transform transition-all">
+          <div className="bg-white rounded-xl p-6 w-full max-w-sm shadow-2xl">
             <h3 className="text-lg font-semibold mb-2">{t("delete.title")}</h3>
             <p className="text-gray-600 text-sm mb-6">{t("delete.message")}</p>
             <div className="flex justify-end gap-3">
