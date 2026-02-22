@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { addFavorite, removeFavorite, getFavoriteIds } from "../lib/favorite";
+import FavoriteButton from "./FavoriteButton";
 
 interface Recipe {
   name: string;
@@ -17,10 +19,40 @@ interface RecipeCarouselProps {
 function RecipeCarousel({ recipes }: RecipeCarouselProps) {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const {t} = useTranslation('common');
+  const [favoriteRecipe, setFavoriteRecipe] = useState<number[]>([]);
+  const { t } = useTranslation('common');
   // Calculate how many cards to show based on screen size
   const cardsPerView = 3;
   const maxIndex = Math.max(0, recipes.length - cardsPerView);
+
+  useEffect(() => {
+    const loadFavorites = async () => {
+      try {
+        const ids = await getFavoriteIds();
+        setFavoriteRecipe(ids);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadFavorites();
+  }, []);
+
+  const toggleFavorite = async (recipe: Recipe) => {
+    const isFav = favoriteRecipe.includes(recipe.id);
+    try {
+      if (isFav) {
+        await removeFavorite(recipe.id);
+        setFavoriteRecipe((prev) => prev.filter((id) => id !== recipe.id));
+      } else {
+        await addFavorite(recipe.id);
+        setFavoriteRecipe((prev) => [...prev, recipe.id]);
+      }
+    } catch (err) {
+      console.error("Failed to toggle favorite:", err);
+    }
+  };
+
+  const isFavorite = (id: number) => favoriteRecipe.includes(id);
 
   const handlePrevious = () => {
     setCurrentIndex((prev) => Math.max(0, prev - 1));
@@ -77,6 +109,14 @@ function RecipeCarousel({ recipes }: RecipeCarouselProps) {
                       target.src = "/placeholder.svg";
                     }}
                   />
+                  {/* Favorite Button */}
+                  <div className="absolute top-2 right-2">
+                    <FavoriteButton
+                      recipeId={recipe.id}
+                      isFavorite={isFavorite(recipe.id)}
+                      onToggle={() => toggleFavorite(recipe)}
+                    />
+                  </div>
                 </div>
 
                 {/* Recipe Info */}
@@ -84,7 +124,7 @@ function RecipeCarousel({ recipes }: RecipeCarouselProps) {
                   <h3 className="text-sm font-semibold text-gray-800 mb-3 line-clamp-2 min-h-[2.5rem]">
                     {recipe.name}
                   </h3>
-                  
+
                   <button
                     onClick={() => handleViewDetail(recipe.id)}
                     className="w-full py-2 px-3 bg-[#562C0C] text-white text-sm rounded-full hover:bg-[#3d1f08] transition-colors cursor-pointer"
@@ -116,9 +156,8 @@ function RecipeCarousel({ recipes }: RecipeCarouselProps) {
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                currentIndex === index ? "bg-[#FFCB69]" : "bg-gray-300"
-              }`}
+              className={`w-2 h-2 rounded-full transition-colors ${currentIndex === index ? "bg-[#FFCB69]" : "bg-gray-300"
+                }`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
