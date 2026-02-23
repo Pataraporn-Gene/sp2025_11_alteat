@@ -44,7 +44,7 @@ class RecipeService:
         """Strip common plural suffixes to get a searchable stem."""
         ing = ingredient.strip().lower()
         if ing.endswith("ies"):
-            print(f"Stemming '{ing}' by replacing 'ies' with 'i'")
+            logger.info(f"Stemming '{ingredient}' to '{ing[:-3] + 'i'}'")
             return ing[:-3] + "i"   # strawberries → strawberri (matches both)
         if ing.endswith("ves"):
             return ing[:-3] + "f"   # loaves → loaf stem

@@ -10,6 +10,7 @@ import RecipeCarousel from "../component/RecipeCarousel";
 import { useProfile } from "../context/ProfileContext";
 import IngredientCarousel from "../component/IngredientCarousel";
 import type { IngredientDetail } from "../component/IngredientDetailPopup";
+import chatbotBG from "../assets/chatbot-bg.png";
 
 interface Recipe {
   name: string;
@@ -372,7 +373,7 @@ function ChatbotPage() {
   return (
     <div
       className="h-screen flex flex-col w-full bg-cover bg-center bg-no-repeat overflow-hidden"
-      style={{ backgroundImage: "url('/src/assets/chatbot-bg.png')" }}
+      style={{ backgroundImage: `url('${chatbotBG}')` }}
     >
       <Navbar />
 
