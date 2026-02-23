@@ -54,13 +54,9 @@ class RecipeService:
             
             logger.info(f"Searching for recipes with ingredients: {search_ingredients}")
             
-            # Construct OR filter to find recipes containing any of the ingredients
-            # Search in both ingredients column and recipe_name
-            or_conditions = []
-            for ing in search_ingredients:
-                or_conditions.append(f"ingredients.ilike.%{ing}%")
-                or_conditions.append(f"recipe_name.ilike.%{ing}%")
-            
+            # Construct OR filter - search ONLY in ingredients column, not recipe_name
+            # This prevents matching recipe names like "Apple Crisp" when searching for "apple"
+            or_conditions = [f"ingredients.ilike.%{ing}%" for ing in search_ingredients]
             or_filter = ",".join(or_conditions)
                 
             # Fetch more results than needed to properly sort by match count
@@ -78,11 +74,11 @@ class RecipeService:
             # Calculate match score for each recipe
             scored_recipes = []
             for record in response.data:
-                recipe_ingredients_str = record.get("ingredients", "")
+                recipe_ingredients_str = record.get("ingredients", "") or ""
                 recipe_name = record.get("recipe_name") or record.get("title", "Unknown Recipe")
                 
-                # Combine ingredients and name for searching
-                search_text = f"{recipe_ingredients_str or ''} {recipe_name}".lower()
+                # Only search in ingredients field for matching
+                search_text = recipe_ingredients_str.lower()
                 
                 # Count how many of the requested ingredients are in this recipe
                 match_count = sum(
@@ -102,7 +98,7 @@ class RecipeService:
                 )
                 
                 scored_recipes.append((match_count, recipe_suggestion))
-                logger.debug(f"Recipe '{recipe_name}' has {match_count} matching ingredients")
+                logger.info(f"Recipe '{recipe_name}' has {match_count}/{len(search_ingredients)} matching ingredients")
             
             # Sort by match count (descending) - recipes with more matches come first
             scored_recipes.sort(key=lambda x: x[0], reverse=True)
@@ -112,7 +108,7 @@ class RecipeService:
             
             logger.info(f"Returning {len(results)} recipes sorted by match count")
             if results:
-                logger.info(f"Top result: '{results[0].name}' with {scored_recipes[0][0]} matches")
+                logger.info(f"Top result: '{results[0].name}' with {scored_recipes[0][0]}/{len(search_ingredients)} matches")
             
             return results
         except Exception as e:
