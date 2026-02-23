@@ -41,33 +41,79 @@ class RecipeService:
             logger.error(f"Failed to initialize Supabase client: {e}")
 
     def _get_supabase_suggestions(self, ingredients: List[str], limit: int) -> List[RecipeSuggestion]:
-        """Get suggestions from Supabase."""
+        """Get suggestions from Supabase, prioritizing recipes with more matching ingredients."""
         if not self._supabase or not ingredients:
             return []
             
         try:
-            # Construct OR filter to find recipes containing any of the ingredients
-            # Assumes 'recipes' table with 'ingredients' column
-            or_filter = ",".join(f"ingredients.ilike.%{ing.strip()}%" for ing in ingredients if ing.strip())
+            # Normalize ingredient search terms (lowercase and strip)
+            search_ingredients = [ing.strip().lower() for ing in ingredients if ing.strip()]
             
-            if not or_filter:
+            if not search_ingredients:
                 return []
+            
+            logger.info(f"Searching for recipes with ingredients: {search_ingredients}")
+            
+            # Construct OR filter to find recipes containing any of the ingredients
+            # Search in both ingredients column and recipe_name
+            or_conditions = []
+            for ing in search_ingredients:
+                or_conditions.append(f"ingredients.ilike.%{ing}%")
+                or_conditions.append(f"recipe_name.ilike.%{ing}%")
+            
+            or_filter = ",".join(or_conditions)
                 
+            # Fetch more results than needed to properly sort by match count
+            # Use limit * 3 to get enough candidates for sorting
+            fetch_limit = min(limit * 3, 100)  # Cap at 100 to avoid excessive queries
+            
             response = self._supabase.table("recipes") \
                 .select("*") \
                 .or_(or_filter) \
-                .limit(limit) \
+                .limit(fetch_limit) \
                 .execute()
+            
+            logger.info(f"Supabase query returned {len(response.data)} recipes")
                 
-            results = []
+            # Calculate match score for each recipe
+            scored_recipes = []
             for record in response.data:
-                name = record.get("recipe_name") or record.get("title", "Unknown Recipe")
-                # ing_data = record.get("ingredients", "")
-                # ing_text = ", ".join(str(x) for x in ing_data) if isinstance(ing_data, list) else str(ing_data)
+                recipe_ingredients_str = record.get("ingredients", "")
+                recipe_name = record.get("recipe_name") or record.get("title", "Unknown Recipe")
                 
-                results.append(RecipeSuggestion(name=name, ingredients="", id=record.get("id"), image=record.get("img_src")))
+                # Combine ingredients and name for searching
+                search_text = f"{recipe_ingredients_str or ''} {recipe_name}".lower()
                 
-            print(f"Supabase returned {len(results)} recipes.")
+                # Count how many of the requested ingredients are in this recipe
+                match_count = sum(
+                    1 for search_ing in search_ingredients 
+                    if search_ing in search_text
+                )
+                
+                # Skip recipes with no matches (shouldn't happen, but safety check)
+                if match_count == 0:
+                    continue
+                
+                recipe_suggestion = RecipeSuggestion(
+                    name=recipe_name, 
+                    ingredients="", 
+                    id=record.get("id"), 
+                    image=record.get("img_src")
+                )
+                
+                scored_recipes.append((match_count, recipe_suggestion))
+                logger.debug(f"Recipe '{recipe_name}' has {match_count} matching ingredients")
+            
+            # Sort by match count (descending) - recipes with more matches come first
+            scored_recipes.sort(key=lambda x: x[0], reverse=True)
+            
+            # Return only the top 'limit' results
+            results = [recipe for _, recipe in scored_recipes[:limit]]
+            
+            logger.info(f"Returning {len(results)} recipes sorted by match count")
+            if results:
+                logger.info(f"Top result: '{results[0].name}' with {scored_recipes[0][0]} matches")
+            
             return results
         except Exception as e:
             logger.error(f"Error querying Supabase: {e}")
