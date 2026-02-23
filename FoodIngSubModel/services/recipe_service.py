@@ -40,12 +40,25 @@ class RecipeService:
         except Exception as e:
             logger.error(f"Failed to initialize Supabase client: {e}")
 
+    def _stem_ingredient(self, ingredient: str) -> str:
+        """Strip common plural suffixes to get a searchable stem."""
+        ing = ingredient.strip().lower()
+        if ing.endswith("ies"):
+            return ing[:-3] + "i"   # strawberries → strawberri (matches both)
+        if ing.endswith("ves"):
+            return ing[:-3] + "f"   # loaves → loaf stem
+        if ing.endswith("es"):
+            return ing[:-2]          # tomatoes → tomat
+        if ing.endswith("s"):
+            return ing[:-1]          # eggs → egg
+        return ing
+
     def _get_supabase_suggestions(self, ingredients: List[str], limit: int) -> List[RecipeSuggestion]:
         if not self._supabase or not ingredients:
             return []
             
         try:
-            search_ingredients = [ing.strip().lower() for ing in ingredients if ing.strip()]
+            search_ingredients = [self._stem_ingredient(ing) for ing in ingredients if ing.strip()]
             if not search_ingredients:
                 return []
 
