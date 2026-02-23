@@ -205,7 +205,7 @@ function RecipeSearchPage() {
           <Navbar />
           <div className="flex">
             {/* Hide SearchSideBar's own floating button — we use our custom one instead */}
-            <div className="[&>button]:hidden">
+            <div className="[&>button]:hidden sticky top-0 h-screen overflow-y-auto">
               <SearchSideBar filter={filterSection} onFilterChange={handleFilterChange} />
             </div>
 

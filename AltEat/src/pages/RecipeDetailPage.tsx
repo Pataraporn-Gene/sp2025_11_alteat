@@ -137,23 +137,43 @@ export default function RecipeDetailPage() {
       <Navbar />
 
       <div className="flex relative">
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute left-4 top-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
-        >
-          <ArrowLeft className="w-6 h-6" />
-        </button>
         <main className="flex-1 p-4 sm:p-8 max-w-3xl mx-auto overflow-y-auto">
-          {/* Title */}
-          <div className="flex gap-x-5 justify-center items-center relative">
-            <h1 className="font-(family-name:Alexandria) text-2xl sm:text-4xl font-bold text-center text-[#040404]">
-              {recipe.recipe_name}
-            </h1>
-            <FavoriteButton
-              recipeId={recipe.id}
-              isFavorite={isFavorite(recipe.id)}
-              onToggle={() => toggleFavorite({ id: recipe.id, title: recipe.recipe_name })}
-            />
+          <div className="mb-6">
+            {/* Mobile: Back button on first line */}
+            <div className="block sm:hidden mb-2">
+              <button
+                onClick={() => navigate(-1)}
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* 
+            
+            Mobile: Title and Favorite on second line | Desktop: All in one row */}
+            <div className="flex gap-3 sm:gap-5 items-center justify-center">
+              {/* Desktop: Back button */}
+              <button
+                onClick={() => navigate(-1)}
+                className="hidden sm:block p-2 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0"
+              >
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+
+              <h1 className="font-(family-name:Alexandria) text-3xl sm:text-4xl font-bold text-center text-[#040404] flex-1">
+                {recipe.recipe_name}
+              </h1>
+
+              <div className="flex-shrink-0">
+                <FavoriteButton
+                  recipeId={recipe.id}
+                  isFavorite={isFavorite(recipe.id)}
+                  onToggle={() => toggleFavorite({ id: recipe.id, title: recipe.recipe_name })}
+                  size={24}
+                />
+              </div>
+            </div>
           </div>
 
           {/* Tags */}
