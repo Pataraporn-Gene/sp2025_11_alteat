@@ -32,6 +32,17 @@ function IngredientSearchpage() {
   });
   const [hasSearched, setHasSearched] = useState(false);
 
+  const activeFilterCount =
+    filters.taste.length +
+    filters.texture.length +
+    filters.color.length +
+    filters.shape.length;
+
+  const openMobileFilters = () => {
+    const btn = document.querySelector<HTMLButtonElement>('[aria-label="Open filters"]');
+    btn?.click();
+  };
+
   const filterSection = [
     {
       title: t("ingredient:filters.taste"),
@@ -55,14 +66,12 @@ function IngredientSearchpage() {
     },
   ];
 
-  // Check if any filters are selected
   const hasActiveFilters =
     filters.taste.length > 0 ||
     filters.texture.length > 0 ||
     filters.color.length > 0 ||
     filters.shape.length > 0;
 
-  // Fetch ingredients from Supabase
   const fetchIngredients = useCallback(async () => {
     if (!hasActiveFilters && !searchQuery.trim()) {
       setIngredients([]);
@@ -75,7 +84,6 @@ function IngredientSearchpage() {
     try {
       let query = supabase.from("ingredients").select("*");
 
-      // Apply filter conditions
       if (filters.taste.length > 0) {
         query = query.contains("has_flavor", filters.taste);
       }
@@ -106,7 +114,6 @@ function IngredientSearchpage() {
     }
   }, [filters, hasActiveFilters, searchQuery]);
 
-  // Fetch when filters change
   useEffect(() => {
     if (hasActiveFilters) {
       fetchIngredients();
@@ -116,9 +123,8 @@ function IngredientSearchpage() {
     }
   }, [filters, hasActiveFilters]);
 
-  // Handle filter changes from sidebar
   const handleFilterChange = (filterType: string, selectedItems: string[]) => {
-    console.log("Filter changed:", filterType, selectedItems); // Debug log
+    console.log("Filter changed:", filterType, selectedItems);
 
     let key = filterType.toLowerCase();
 
@@ -138,7 +144,6 @@ function IngredientSearchpage() {
     }));
   };
 
-  // Handle search submission
   const handleSearch = async () => {
     if (!searchQuery.trim() && !hasActiveFilters) return;
 
@@ -152,7 +157,6 @@ function IngredientSearchpage() {
       let data: any[] | null = null;
       let error: any = null;
 
-      // If searching text/traits — use RPC
       if (terms.length > 0) {
         console.log("Searching with terms:", terms);
         const res = await supabase.rpc("search_context_ingredients", { terms });
@@ -168,22 +172,18 @@ function IngredientSearchpage() {
 
       let filtered = data || [];
 
-      // Apply filter checkboxes AFTER RPC
       if (filters.taste.length)
         filtered = filtered.filter((i) =>
           filters.taste.every((f) => i.has_flavor?.includes(f)),
         );
-
       if (filters.texture.length)
         filtered = filtered.filter((i) =>
           filters.texture.every((t) => i.has_texture?.includes(t)),
         );
-
       if (filters.color.length)
         filtered = filtered.filter((i) =>
           filters.color.every((c) => i.has_color?.includes(c)),
         );
-
       if (filters.shape.length)
         filtered = filtered.filter((i) =>
           filters.shape.every((s) => i.has_shape?.includes(s)),
@@ -198,7 +198,6 @@ function IngredientSearchpage() {
     }
   };
 
-  // Handle Enter key press
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleSearch();
@@ -206,82 +205,155 @@ function IngredientSearchpage() {
   };
 
   return (
-    <>
-      <div className="min-h-screen bg-[#FFEDDD]">
-        <div>
-          <Navbar />
-        </div>
-
-        <div className="flex">
+    <div className="min-h-screen bg-[#FFEDDD]">
+      <Navbar />
+      <div className="flex">
+        {/* Hide SearchSideBar's own floating button — we use our custom one instead */}
+        <div className="[&>button]:hidden">
           <SearchSideBar
             filter={filterSection}
             onFilterChange={handleFilterChange}
           />
-          <div className="flex-1 flex justify-center">
-            {/* Main Content */}
-            <div className="flex flex-col items-center mb-20 max-w-7xl w-full px-4 sm:px-8">
-              <div className="flex items-center mb-5 w-full">
-                <div className="flex-1">
-                  <h1 className="text-3xl sm:text-5xl mb-3 sm:mb-4">{t("ingredient:search.title")}</h1>
-                  <p className="text-[15px] sm:text-[16px]">{t("ingredient:search.subtitle")}</p>
-                </div>
-                <img src={context || "/placeholder.svg"} className="hidden sm:block w-32 shrink-0" />
-              </div>
+        </div>
 
-              {/* Text Input */}
-              <div className="w-full relative">
-                <img
-                  src={search || "/placeholder.svg"}
-                  className="absolute right-4 top-3 cursor-pointer"
-                  onClick={handleSearch}
-                />
-                <input
-                  type="text"
-                  placeholder={t("ingredient:search.searchPlaceholder")}
-                  className="px-6 py-3 bg-white w-full rounded-[20px] outline-[1.5px] shadow-[0_8px_4px_rgba(0,0,0,0.25)]"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                />
-              </div>
+        {/* Main content — takes full width on mobile, remaining width on desktop */}
+        <div className="flex-1 flex justify-center">
+          <div className="flex flex-col items-center mb-20 max-w-7xl w-full px-5 md:w-[85%] md:px-0">
 
-              {/* Card Item */}
-              <div className="w-full">
-                <div className="flex flex-col items-start mt-8 sm:mt-14">
-                  {loading ? (
-                    <div className="w-full flex justify-center py-12">
-                      <div className="text-xl text-[#562C0C]">
-                        {t("ingredient:search.loadingIngredients")}
-                      </div>
-                    </div>
-                  ) : !hasSearched ? (
-                    <div className="w-full flex flex-col items-center justify-center py-12 text-center">
-                      <div className="text-xl sm:text-2xl text-[#562C0C] mb-2">
-                        {t("ingredient:search.selectFilters")}
-                      </div>
-                      <p className="text-gray-500">
-                        {t("ingredient:search.useFilters")}
-                      </p>
-                    </div>
-                  ) : ingredients.length === 0 ? (
-                    <div className="w-full flex flex-col items-center justify-center py-12 text-center">
-                      <div className="text-xl sm:text-2xl text-[#562C0C] mb-2">
-                        {t("ingredient:search.noIngredientsFound")}
-                      </div>
-                      <p className="text-gray-500">
-                        {t("ingredient:search.adjustingFilters")}
-                      </p>
-                    </div>
-                  ) : (
-                    <IngredientCard ingredients={ingredients} />
+            {/* Header */}
+            <div className="flex items-center mb-5 w-full mt-4 md:mt-0">
+              <div className="flex-1">
+                <h1 className="text-3xl md:text-5xl mb-2 md:mb-4 leading-tight">
+                  {t("ingredient:search.title")}
+                </h1>
+                <p className="text-[14px] md:text-[16px]">
+                  {t("ingredient:search.subtitle")}
+                </p>
+              </div>
+              <img
+                src={context || "/placeholder.svg"}
+                className="w-24 h-24 object-contain md:w-auto md:h-auto"
+              />
+            </div>
+
+            {/* Search bar */}
+            <div className="w-full relative">
+              <img
+                src={search || "/placeholder.svg"}
+                className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer w-5 h-5 md:w-auto md:h-auto object-contain"
+                onClick={handleSearch}
+              />
+              <input
+                type="text"
+                placeholder={t("ingredient:search.searchPlaceholder")}
+                className="px-6 py-3 bg-white w-full rounded-[20px] outline-[1.5px] shadow-[0_8px_4px_rgba(0,0,0,0.25)] text-sm md:text-base"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleKeyPress}
+              />
+            </div>
+
+            {/* Mobile: Filter button + active pills — hidden on desktop */}
+            <div className="md:hidden w-full mt-4">
+              <div className="flex items-center gap-3 mb-3">
+                <button
+                  onClick={openMobileFilters}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#562C0C] text-white rounded-full text-sm font-medium shadow-md active:scale-95 transition-transform"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"
+                    />
+                  </svg>
+                  Filters
+                  {activeFilterCount > 0 && (
+                    <span className="bg-white text-[#562C0C] rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold leading-none">
+                      {activeFilterCount}
+                    </span>
                   )}
+                </button>
+
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={() => setFilters({ taste: [], texture: [], color: [], shape: [] })}
+                    className="text-sm text-[#562C0C]/60 underline"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+
+              {/* Active filter pills */}
+              {activeFilterCount > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {[...filters.taste, ...filters.texture, ...filters.color, ...filters.shape].map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-3 py-1 bg-[#562C0C]/10 text-[#562C0C] rounded-full text-xs font-medium border border-[#562C0C]/20"
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
+              )}
+            </div>
+
+            {/* Results */}
+            <div className="w-full">
+              <div className="flex flex-col items-start mt-8 md:mt-14">
+                {loading ? (
+                  <div className="w-full flex justify-center py-12">
+                    <div className="text-xl text-[#562C0C]">
+                      {t("ingredient:search.loadingIngredients")}
+                    </div>
+                  </div>
+                ) : !hasSearched ? (
+                  <div className="w-full flex flex-col items-center justify-center py-12 text-center">
+                    <svg
+                      className="w-14 h-14 text-[#562C0C]/20 mb-4 md:hidden"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                    <div className="text-xl md:text-2xl text-[#562C0C] mb-2">
+                      {t("ingredient:search.selectFilters")}
+                    </div>
+                    <p className="text-gray-500 text-sm md:text-base">
+                      {t("ingredient:search.useFilters")}
+                    </p>
+                  </div>
+                ) : ingredients.length === 0 ? (
+                  <div className="w-full flex flex-col items-center justify-center py-12 text-center">
+                    <svg
+                      className="w-14 h-14 text-[#562C0C]/20 mb-4 md:hidden"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                        d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <div className="text-xl md:text-2xl text-[#562C0C] mb-2">
+                      {t("ingredient:search.noIngredientsFound")}
+                    </div>
+                    <p className="text-gray-500 text-sm md:text-base">
+                      {t("ingredient:search.adjustingFilters")}
+                    </p>
+                  </div>
+                ) : (
+                  <IngredientCard ingredients={ingredients} />
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

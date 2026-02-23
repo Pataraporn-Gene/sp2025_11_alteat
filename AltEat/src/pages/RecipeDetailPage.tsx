@@ -137,15 +137,15 @@ export default function RecipeDetailPage() {
       <Navbar />
 
       <div className="flex relative">
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute left-4 top-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
         <main className="flex-1 p-4 sm:p-8 max-w-3xl mx-auto overflow-y-auto">
           {/* Title */}
           <div className="flex gap-x-5 justify-center items-center relative">
-            <button
-              onClick={() => navigate(-1)}
-              className="absolute left-0 p-2 rounded-full hover:bg-gray-100 transition-colors"
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </button>
             <h1 className="font-(family-name:Alexandria) text-2xl sm:text-4xl font-bold text-center text-[#040404]">
               {recipe.recipe_name}
             </h1>

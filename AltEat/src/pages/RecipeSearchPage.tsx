@@ -35,6 +35,14 @@ function RecipeSearchPage() {
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(false)
 
+  const activeFilterCount =
+    filters.ingredient.length + filters.method.length + filters.cuisine.length
+
+  const openMobileFilters = () => {
+    const btn = document.querySelector<HTMLButtonElement>('[aria-label="Open filters"]')
+    btn?.click()
+  }
+
   const normalizeRecipes = (data: any[]): Recipe[] => {
     console.log(data)
     return data.map((r) => ({
@@ -158,7 +166,7 @@ function RecipeSearchPage() {
 
   // Handle filter changes from sidebar
   const handleFilterChange = (filterType: string, selectedItems: string[]) => {
-    console.log("Filter changed:", filterType, selectedItems); // Debug log
+    console.log("Filter changed:", filterType, selectedItems)
     
     let key = filterType.toLowerCase()
     
@@ -196,36 +204,87 @@ function RecipeSearchPage() {
         <div className="relative">
           <Navbar />
           <div className="flex">
-            {/* Side Bar */}
-            <SearchSideBar filter={filterSection} onFilterChange={handleFilterChange} />
+            {/* Hide SearchSideBar's own floating button — we use our custom one instead */}
+            <div className="[&>button]:hidden">
+              <SearchSideBar filter={filterSection} onFilterChange={handleFilterChange} />
+            </div>
 
             <div className="flex-1 flex justify-center">
               {/* Main Content */}
-              <div className="flex flex-col items-center mb-20 max-w-7xl w-full px-4 sm:px-8">
-                <div className="flex items-center mb-5 w-full">
+              <div className="flex flex-col items-center mb-20 max-w-7xl w-full px-5 md:w-[85%] md:px-0">
+
+                {/* Header */}
+                <div className="flex items-center mb-5 w-full mt-4 md:mt-0">
                   <div className="flex-1">
-                    <h1 className="text-3xl sm:text-5xl mb-3 sm:mb-4">{t('recipe:search.title')}</h1>
-                    <p className="text-[15px] sm:text-[16px]">{t('recipe:search.subtitle')}</p>
+                    <h1 className="text-3xl md:text-5xl mb-2 md:mb-4 leading-tight">
+                      {t('recipe:search.title')}
+                    </h1>
+                    <p className="text-[14px] md:text-[16px]">{t('recipe:search.subtitle')}</p>
                   </div>
-                  <img src={recipe_img} alt="Recipe" className="hidden sm:block w-32 shrink-0" />
+                  <img src={recipe_img} alt="Recipe" className="w-24 h-24 object-contain md:w-auto md:h-auto" />
                 </div>
 
-                {/* Text Input */}
+                {/* Search bar */}
                 <div className="w-full relative">
                   <img
                     src={search || "/placeholder.svg"}
-                    className="absolute right-4 top-3 cursor-pointer"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer w-5 h-5 md:w-auto md:h-auto object-contain"
                     onClick={handleSearch}
                     alt="Search"
                   />
                   <input
                     type="text"
                     placeholder={t('recipe:search.searchPlaceholder')}
-                    className="px-6 py-3 bg-white w-full rounded-[20px] outline-[1.5px] shadow-[0_8px_4px_rgba(0,0,0,0.25)]"
+                    className="px-6 py-3 bg-white w-full rounded-[20px] outline-[1.5px] shadow-[0_8px_4px_rgba(0,0,0,0.25)] text-sm md:text-base"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={handleKeyPress}
                   />
+                </div>
+
+                {/* Mobile: Filter button + active pills — hidden on desktop */}
+                <div className="md:hidden w-full mt-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <button
+                      onClick={openMobileFilters}
+                      className="flex items-center gap-2 px-4 py-2 bg-[#562C0C] text-white rounded-full text-sm font-medium shadow-md active:scale-95 transition-transform"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"
+                        />
+                      </svg>
+                      Filters
+                      {activeFilterCount > 0 && (
+                        <span className="bg-white text-[#562C0C] rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold leading-none">
+                          {activeFilterCount}
+                        </span>
+                      )}
+                    </button>
+
+                    {activeFilterCount > 0 && (
+                      <button
+                        onClick={() => setFilters({ ingredient: [], method: [], cuisine: [] })}
+                        className="text-sm text-[#562C0C]/60 underline"
+                      >
+                        Clear all
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Active filter pills */}
+                  {activeFilterCount > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {[...filters.ingredient, ...filters.method, ...filters.cuisine].map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-3 py-1 bg-[#562C0C]/10 text-[#562C0C] rounded-full text-xs font-medium border border-[#562C0C]/20"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Card Item */}
@@ -242,13 +301,33 @@ function RecipeSearchPage() {
                       </div>
                     ) : !hasSearched ? (
                       <div className="w-full flex flex-col items-center justify-center py-12 text-center">
+                        <svg
+                          className="w-14 h-14 text-[#562C0C]/20 mb-4 md:hidden"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                          />
+                        </svg>
                         <div className="text-xl sm:text-2xl text-[#562C0C] mb-2">{t('recipe:search.selectFilters')}</div>
-                        <p className="text-gray-500">{t('recipe:search.useFilters')}</p>
+                        <p className="text-gray-500 text-sm md:text-base">{t('recipe:search.useFilters')}</p>
                       </div>
                     ) : recipes.length === 0 ? (
                       <div className="w-full flex flex-col items-center justify-center py-12 text-center">
+                        <svg
+                          className="w-14 h-14 text-[#562C0C]/20 mb-4 md:hidden"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                            d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
                         <div className="text-xl sm:text-2xl text-[#562C0C] mb-2">{t('recipe:search.noRecipesFound')}</div>
-                        <p className="text-gray-500">{t('recipe:search.adjustFilters')}</p>
+                        <p className="text-gray-500 text-sm md:text-base">{t('recipe:search.adjustFilters')}</p>
                       </div>
                     ) : (
                       <RecipeCard recipes={normalizeRecipes(recipes)} />
@@ -277,7 +356,7 @@ function RecipeSearchPage() {
         </div>
       </div>
     </>
-  );
+  )
 }
 
-export default RecipeSearchPage;
+export default RecipeSearchPage
