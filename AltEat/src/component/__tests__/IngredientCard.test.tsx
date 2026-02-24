@@ -18,6 +18,7 @@ vi.mock('../IngredientDetailPopup', () => ({
 describe('IngredientCard', () => {
   const ingredient: IngredientDetail = {
     ingredient_id: 1,
+    img_src: 'https://via.placeholder.com/300',
     ingredient_name: 'Apple',
     type: 'Fruit',
     has_benefit: null,
