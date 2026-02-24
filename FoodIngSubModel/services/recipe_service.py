@@ -7,6 +7,7 @@ Service for recipe-related operations, delegating to OpenAI service for recipe s
 
 import os
 from typing import List, Optional, Tuple
+from urllib import response
 
 from config import Config
 from models import RecipeSuggestion
@@ -44,15 +45,20 @@ class RecipeService:
         """Strip common plural suffixes to get a searchable stem."""
         ing = ingredient.strip().lower()
         if ing.endswith("ies"):
-            logger.info(f"Stemming '{ingredient}' to '{ing[:-3] + 'i'}'")
-            return ing[:-3] + "i"   # strawberries → strawberri (matches both)
-        if ing.endswith("ves"):
-            return ing[:-3] + "f"   # loaves → loaf stem
-        if ing.endswith("es"):
-            return ing[:-2]          # tomatoes → tomat
-        if ing.endswith("s"):
-            return ing[:-1]          # eggs → egg
-        return ing
+            stem = ing[:-3]          # strawberries → strawberr
+        elif ing.endswith("ves"):
+            stem = ing[:-3]          # loaves → loa (catches loaf too)
+        elif ing.endswith("es"):
+            stem = ing[:-2]          # tomatoes → tomat
+        elif ing.endswith("s"):
+            stem = ing[:-1]          # eggs → egg
+        elif ing.endswith("y"):
+            stem = ing[:-1]          # strawberry → strawberr ✅ matches strawberries too
+        else:
+            stem = ing
+    
+        logger.info(f"Stemming '{ingredient}' → '{stem}'")
+        return stem
 
     def _get_supabase_suggestions(self, ingredients: List[str], limit: int) -> List[RecipeSuggestion]:
         if not self._supabase or not ingredients:
@@ -71,9 +77,14 @@ class RecipeService:
             ).execute()
 
             logger.info(f"Supabase RPC returned {len(response.data)} recipes")
-
+            
+            seen_ids = set()
             results = []
             for record in response.data:
+                recipe_id = record.get("id")
+                if recipe_id in seen_ids:
+                    continue
+                seen_ids.add(recipe_id)
                 recipe_name = record.get("recipe_name") or "Unknown Recipe"
                 match_count = record.get("match_count", 0)
                 logger.info(f"Recipe '{recipe_name}' matches {match_count}/{len(search_ingredients)} ingredients")
@@ -81,7 +92,7 @@ class RecipeService:
                 results.append(RecipeSuggestion(
                     name=recipe_name,
                     ingredients="",
-                    id=record.get("id"),
+                    id=recipe_id,
                     image=record.get("img_src")
                 ))
 
