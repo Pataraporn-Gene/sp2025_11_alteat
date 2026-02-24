@@ -15,6 +15,7 @@ export interface IngredientDetail {
   has_flavor: string[] | null
   has_vitamin: string[] | null
   has_nutrient: string[] | null
+  img_src: string
 }
 
 interface IngredientDetailPopupProps {

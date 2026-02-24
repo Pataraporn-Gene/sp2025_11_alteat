@@ -1,16 +1,20 @@
-import { useState } from "react"
-import IngredientDetailPopup, { type IngredientDetail } from "./IngredientDetailPopup"
-import { useTranslation } from 'react-i18next'
+import { useState } from "react";
+import IngredientDetailPopup, {
+  type IngredientDetail,
+} from "./IngredientDetailPopup";
+import { useTranslation } from "react-i18next";
 
 interface IngredientCardProps {
   ingredients: IngredientDetail[]
 }
 
 function IngredientCard({ ingredients }: IngredientCardProps) {
-  const [selectedIngredient, setSelectedIngredient] = useState<IngredientDetail | null>(null)
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [isPopupOpen, setIsPopupOpen] = useState(false)
-  const { t } = useTranslation('ingredient')
+  const [selectedIngredient, setSelectedIngredient] =
+    useState<IngredientDetail | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const { t } = useTranslation("ingredient");
 
   const handleMoreDetail = (ingredient: IngredientDetail) => {
     setSelectedIngredient(ingredient)
@@ -26,12 +30,13 @@ function IngredientCard({ ingredients }: IngredientCardProps) {
 
   // Helper to get display tags from ingredient
   const getTags = (ingredient: IngredientDetail): string[] => {
-    const tags: string[] = []
-    if (ingredient.has_flavor) tags.push(...ingredient.has_flavor.slice(0, 2))
-    if (ingredient.has_texture) tags.push(...ingredient.has_texture.slice(0, 1))
-    if (ingredient.has_color) tags.push(...ingredient.has_color.slice(0, 1))
-    return tags.slice(0, 4)
-  }
+    const tags: string[] = [];
+    if (ingredient.has_flavor) tags.push(...ingredient.has_flavor.slice(0, 2));
+    if (ingredient.has_texture)
+      tags.push(...ingredient.has_texture.slice(0, 1));
+    if (ingredient.has_color) tags.push(...ingredient.has_color.slice(0, 1));
+    return tags.slice(0, 4);
+  };
 
   return (
     <>
@@ -41,16 +46,34 @@ function IngredientCard({ ingredients }: IngredientCardProps) {
             key={ingredient.ingredient_id}
             className="bg-white rounded-2xl overflow-hidden shadow-[0_3px_2px_rgba(0,0,0,0.25)]"
           >
-            {/* Ingredient Image Placeholder */}
+            {/* Ingredient Image  */}
             <div className="relative">
-              <div className="w-full h-45 bg-gradient-to-br from-[#FFEDDD] to-[#FFCB69] flex items-center justify-center">
-                <span className="text-4xl sm:text-6xl">{ingredient.ingredient_name.charAt(0).toUpperCase()}</span>
-              </div>
+              {!imageErrors[ingredient.ingredient_id] ? (
+                <img
+                  src={`https://yrpoikxovgaplilgwfys.supabase.co/storage/v1/object/public/ingredients_img/${ingredient.ingredient_id}.jpg` || "invalid-image"}
+                  alt={ingredient.ingredient_name}
+                  className="w-full h-full rounded-tl-2xl rounded-tr-2xl object-cover"
+                  onError={() =>
+                    setImageErrors((prev) => ({
+                      ...prev,
+                      [ingredient.ingredient_id]: true,
+                    }))
+                  }
+                />
+              ) : (
+                <div className="w-full h-[180px] bg-gradient-to-br from-[#FFEDDD] to-[#FFCB69] flex items-center justify-center rounded-tl-2xl rounded-tr-2xl">
+                  <span className="text-6xl font-semibold">
+                    {ingredient.ingredient_name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col items-center mt-4 px-4">
               {/* Ingredient Name */}
-              <h3 className="text-[#562C0C] font-medium text-xl sm:text-2xl text-center">{ingredient.ingredient_name}</h3>
+              <h3 className="text-[#562C0C] font-medium text-2xl text-center">
+                {ingredient.ingredient_name}
+              </h3>
               {/* Type */}
               <span className="text-gray-500 text-sm mt-1">{ingredient.type}</span>
               {/* Tags */}
@@ -77,7 +100,12 @@ function IngredientCard({ ingredients }: IngredientCardProps) {
       </div>
 
       {/* Detail Popup */}
-      <IngredientDetailPopup ingredient={selectedIngredient} tags={selectedTags} isOpen={isPopupOpen} onClose={handleClosePopup} />
+      <IngredientDetailPopup
+        ingredient={selectedIngredient}
+        tags={selectedTags}
+        isOpen={isPopupOpen}
+        onClose={handleClosePopup}
+      />
     </>
 
 
@@ -85,4 +113,4 @@ function IngredientCard({ ingredients }: IngredientCardProps) {
   )
 }
 
-export default IngredientCard
+export default IngredientCard;

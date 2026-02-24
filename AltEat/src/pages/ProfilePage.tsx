@@ -124,6 +124,22 @@ export default function ProfilePage() {
       const ext = file.name.split(".").pop();
       const path = `${profile.id}/avatar.${ext}`;
 
+      const { data: files, error: listError } = await supabase.storage
+        .from("avatars")
+        .list(profile.id);
+
+      if (listError) throw listError;
+
+      if (files && files.length > 0) {
+        const paths = files.map((file) => `${profile.id}/${file.name}`);
+
+        const { error: removeError } = await supabase.storage
+          .from("avatars")
+          .remove(paths);
+
+        if (removeError) throw removeError;
+      }
+
       const { error } = await supabase.storage
         .from("avatars")
         .upload(path, file, { upsert: true });
@@ -132,9 +148,11 @@ export default function ProfilePage() {
 
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
 
+      const freshUrl = `${data.publicUrl}?t=${Date.now()}`;
+
       await supabase
         .from("profiles")
-        .update({ avatar_url: data.publicUrl })
+        .update({ avatar_url: freshUrl })
         .eq("id", profile.id);
 
       await refreshProfile();
@@ -427,7 +445,9 @@ export default function ProfilePage() {
                     <div className="w-full border-t border-gray-200"></div>
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="bg-white px-2 text-gray-400">{t("delete.dangerZone", "Danger Zone")}</span>
+                    <span className="bg-white px-2 text-gray-400">
+                      {t("delete.dangerZone", "Danger Zone")}
+                    </span>
                   </div>
                 </div>
 
@@ -602,10 +622,10 @@ export default function ProfilePage() {
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl transform transition-all">
-            <h3 className="text-lg font-semibold mb-4 border-b border-gray-200 pb-2">{t("delete.title")}</h3>
-            <p className="text-gray-600 text-sm mb-6">
-              {t("delete.message")}
-            </p>
+            <h3 className="text-lg font-semibold mb-4 border-b border-gray-200 pb-2">
+              {t("delete.title")}
+            </h3>
+            <p className="text-gray-600 text-sm mb-6">{t("delete.message")}</p>
             <div className="flex justify-start gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
@@ -637,10 +657,10 @@ export default function ProfilePage() {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Check className="w-8 h-8 text-green-600" />
             </div>
-            <h3 className="text-xl font-bold mb-2 text-gray-800">{t("delete.successTitle")}</h3>
-            <p className="text-gray-600 mb-6">
-              {t("delete.successMessage")}
-            </p>
+             <h3 className="text-xl font-bold mb-2 text-gray-800">
+              {t("delete.successTitle")}
+            </h3>
+            <p className="text-gray-600 mb-6">{t("delete.successMessage")}</p>
           </div>
         </div>
       )}

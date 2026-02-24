@@ -65,7 +65,7 @@ function RecipeCard({ recipes }: RecipeCardProps) {
             {/* Recipe Image */}
             <div className="relative">
               <img
-                src={recipe.image}
+                src={`https://yrpoikxovgaplilgwfys.supabase.co/storage/v1/object/public/recipe-img/${recipe.id}.jpg`}
                 alt={recipe.title}
                 className="w-full h-48 sm:h-56 object-cover rounded-tl-2xl rounded-tr-2xl"
                 onError={(e) => {

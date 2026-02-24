@@ -1,36 +1,36 @@
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect, useCallback } from "react"
-import Navbar from "../component/Navbar"
-import SearchSideBar from "../component/SearchSideBar"
-import { recipeFilter } from "../data/recipeFilter"
-import recipe_img from "../assets/recipe.png"
-import search from "../assets/search.png"
-import RecipeCard from "../component/RecipeCard"
-import type { Recipe } from "../component/RecipeCard"
-import { supabase } from "../lib/supabase"
-import { useTranslation } from 'react-i18next'
-import { translateToEnglish } from "../lib/translateQuery"  
+import { useState, useEffect, useCallback } from "react";
+import Navbar from "../component/Navbar";
+import SearchSideBar from "../component/SearchSideBar";
+import { recipeFilter } from "../data/recipeFilter";
+import recipe_img from "../assets/recipe.png";
+import search from "../assets/search.png";
+import RecipeCard from "../component/RecipeCard";
+import type { Recipe } from "../component/RecipeCard";
+import { supabase } from "../lib/supabase";
+import { useTranslation } from 'react-i18next';
+import { translateToEnglish } from "../lib/translateQuery";  
 
 interface Filters {
-  ingredient: string[]
-  method: string[]
-  cuisine: string[]
+  ingredient: string[];
+  method: string[];
+  cuisine: string[];
 }
 
 function RecipeSearchPage() {
-  const { t } = useTranslation(['recipe', 'common'])
-  const [recipes, setRecipes] = useState<Recipe[]>([])
-  const [loading, setLoading] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
+  const { t } = useTranslation(["recipe", "common"]);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<Filters>({
     ingredient: [],
     method: [],
     cuisine: [],
   })
-  const [hasSearched, setHasSearched] = useState(false)
+  const [hasSearched, setHasSearched] = useState(false);
 
-  const PAGE_SIZE = 20
+  const PAGE_SIZE = 20;
 
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(false)
@@ -44,36 +44,41 @@ function RecipeSearchPage() {
   }
 
   const normalizeRecipes = (data: any[]): Recipe[] => {
-    console.log(data)
+     console.log(data);
     return data.map((r) => ({
       id: r.id,
       title: r.recipe_name,
       image: r.img_src || ".",
       tags: [
-        ...(r.cuisine_path ? r.cuisine_path.split("/").filter((tag: string) => tag.trim()).slice(1, 3) : []),
+        ...(r.cuisine_path
+          ? r.cuisine_path
+              .split("/")
+              .filter((tag: string) => tag.trim())
+              .slice(1, 3)
+          : []),
       ],
       isFavorite: false,
-    }))
-  }
+    }));
+  };
 
   // Keep filter items as strings
   const filterSection = [
     {
-      title: t('recipe:filters.ingredient'),
-      category: 'ingredient',
+      title: t("recipe:filters.ingredient"),
+      category: "ingredient",
       items: recipeFilter[0].ingredient,
     },
     {
-      title: t('recipe:filters.method'),
-      category: 'method',
+      title: t("recipe:filters.method"),
+      category: "method",
       items: recipeFilter[0].method,
     },
     {
-      title: t('recipe:filters.cuisine'),
-      category: 'cuisine',
+      title: t("recipe:filters.cuisine"),
+      category: "cuisine",
       items: recipeFilter[0].cuisine,
     },
-  ]
+  ];
 
   const hasActiveFilters = filters.ingredient.length > 0 || filters.method.length > 0 || filters.cuisine.length > 0
 
@@ -82,7 +87,7 @@ function RecipeSearchPage() {
       setRecipes([])
       setHasMore(false)
       setHasSearched(false)
-      return
+      return;
     }
 
     setLoading(true)
@@ -95,9 +100,11 @@ function RecipeSearchPage() {
 
       // Apply search query
       if (searchQuery.trim()) {
-        const translatedQuery = await translateToEnglish(searchQuery)
-        const searchTerm = translatedQuery.trim()
-        query = query.or(`recipe_name.ilike.%${searchTerm}%,ingredients.ilike.%${searchTerm}%,cuisine_path.ilike.%${searchTerm}%`)
+          const translatedQuery = await translateToEnglish(searchQuery);
+          const searchTerm = translatedQuery.trim();
+          query = query.or(
+            `recipe_name.ilike.%${searchTerm}%,ingredients.ilike.%${searchTerm}%,cuisine_path.ilike.%${searchTerm}%`,
+          );
       }
 
       // Apply cuisine filter
@@ -138,8 +145,10 @@ function RecipeSearchPage() {
         return
       }
 
-      setRecipes(prev => pageNum === 0 ? (data || []) : [...prev, ...(data || [])])
-      
+      setRecipes((prev) =>
+        pageNum === 0 ? data || [] : [...prev, ...(data || [])],
+      );
+   
       const totalFetched = (pageNum + 1) * PAGE_SIZE
       setHasMore(totalFetched < (count || 0))
 
@@ -151,7 +160,7 @@ function RecipeSearchPage() {
       setLoading(false)
     }
 
-  }, [filters, hasActiveFilters, searchQuery])
+  }, [filters, hasActiveFilters, searchQuery]);
 
   // Reset page when filters or search change
   useEffect(() => {
@@ -171,12 +180,15 @@ function RecipeSearchPage() {
     let key = filterType.toLowerCase()
     
     // Map the translated filter titles back to the filter keys
-    if (key === t('recipe:filters.ingredient').toLowerCase()) {
-      key = "ingredient"
-    } else if (key === t('recipe:filters.method').toLowerCase() || key === "cooking method") {
-      key = "method"
-    } else if (key === t('recipe:filters.cuisine').toLowerCase()) {
-      key = "cuisine"
+    if (key === t("recipe:filters.ingredient").toLowerCase()) {
+      key = "ingredient";
+    } else if (
+      key === t("recipe:filters.method").toLowerCase() ||
+      key === "cooking method"
+    ) {
+      key = "method";
+    } else if (key === t("recipe:filters.cuisine").toLowerCase()) {
+      key = "cuisine";
     }
 
     setFilters((prev) => ({
