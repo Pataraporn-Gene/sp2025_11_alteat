@@ -1,5 +1,9 @@
 import Navbar from "../component/Navbar.tsx";
 import { useTranslation } from 'react-i18next';
+import team from '../assets/team.jpg';  
+import team1 from '../assets/team1.jpg';
+import team2 from '../assets/team2.jpg';
+import team3 from '../assets/team3.jpg';
 
 function AboutUsPage() {
     const { t } = useTranslation('about');
@@ -32,9 +36,9 @@ function AboutUsPage() {
                     {/* Right: Image */}
                     <div className="md:w-1/2">
                     <img
-                        src="/overview.png"
+                        src={team}
                         alt="Overview"
-                        className="w-28 h-28 sm:w-40 sm:h-40 mx-auto object-cover rounded-full shadow-md"
+                        className="w-28 h-28 sm:w-80 sm:h-80 mx-auto object-cover rounded-full shadow-md"
                     />
                     </div>
                 </div>
@@ -50,7 +54,7 @@ function AboutUsPage() {
                         {/* Member 1 */}
                         <div className="text-center">
                         <img
-                            src="/team1.png"
+                            src={team1}
                             alt="Team Member 1"
                             className="w-40 h-40 mx-auto object-cover rounded-full shadow-md"
                         />
@@ -62,7 +66,7 @@ function AboutUsPage() {
                         {/* Member 2 */}
                         <div className="text-center">
                         <img
-                            src="/team2.png"
+                            src={team2}
                             alt="Team Member 2"
                             className="w-40 h-40 mx-auto object-cover rounded-full shadow-md"
                         />
@@ -74,7 +78,7 @@ function AboutUsPage() {
                         {/* Member 3 */}
                         <div className="text-center">
                         <img
-                            src="/team3.png"
+                            src={team3}
                             alt="Team Member 3"
                             className="w-40 h-40 mx-auto object-cover rounded-full shadow-md"
                         />
