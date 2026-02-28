@@ -26,6 +26,7 @@ export default function SignUp() {
 
     if (data) {
       setError("Username already taken");
+      setLoading(false);
       return;
     }
 
@@ -42,7 +43,17 @@ export default function SignUp() {
     setLoading(false);
 
     if (error) {
-      setError(error.message);
+      if (error.message.includes('already registered') || error.message.includes('User already registered')) {
+        setError("An account with this email already exists");
+      } else if (error.message.includes('Password should be')) {
+        setError("Password must be at least 6 characters");
+      } else if (error.message.includes('valid email')) {
+        setError("Please enter a valid email address");
+      } else if (error.message.includes('rate limit')) {
+        setError("Too many attempts. Please wait a moment and try again");
+      } else {
+        setError("Something went wrong. Please try again");
+      }
     } else {
       navigate("/signupsuccess");
     }

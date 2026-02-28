@@ -28,7 +28,17 @@ export function useAuth() {
 
       return data;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Sign up failed");
+      if (err instanceof Error) {
+        if (err.message.includes('already registered')) {
+          setError("An account with this email already exists");
+        } else if (err.message.includes('Password should be')) {
+          setError("Password must be at least 6 characters");
+        } else {
+          setError("Sign up failed. Please try again");
+        }
+      } else {
+        setError("Sign up failed");
+      }
     } finally {
       setLoading(false);
     }
