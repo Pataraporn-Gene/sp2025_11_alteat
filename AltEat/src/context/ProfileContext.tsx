@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
 interface Profile {
-  id: string;
+  user_id: string;
   username: string | null;
   avatar_url: string | null;
   languages: string[];
@@ -30,8 +30,8 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
 
     const { data } = await supabase
       .from("profiles")
-      .select("id, username, avatar_url, languages, cuisine_preferences, skill_level, avoid_ingredients")
-      .eq("id", auth.user.id)
+      .select("user_id, username, avatar_url, languages, cuisine_preferences, skill_level, avoid_ingredients")
+      .eq("user_id", auth.user.id)
       .single();
 
     setProfile(data);

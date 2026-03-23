@@ -122,16 +122,16 @@ export default function ProfilePage() {
       setSaving(true);
 
       const ext = file.name.split(".").pop();
-      const path = `${profile.id}/avatar.${ext}`;
+      const path = `${profile.user_id}/avatar.${ext}`;
 
       const { data: files, error: listError } = await supabase.storage
         .from("avatars")
-        .list(profile.id);
+        .list(profile.user_id);
 
       if (listError) throw listError;
 
       if (files && files.length > 0) {
-        const paths = files.map((file) => `${profile.id}/${file.name}`);
+        const paths = files.map((file) => `${profile.user_id}/${file.name}`);
 
         const { error: removeError } = await supabase.storage
           .from("avatars")
@@ -153,7 +153,7 @@ export default function ProfilePage() {
       await supabase
         .from("profiles")
         .update({ avatar_url: freshUrl })
-        .eq("id", profile.id);
+        .eq("user_id", profile.user_id);
 
       await refreshProfile();
       setMessage({ type: "success", text: t("messages.imageUpdated") });
@@ -173,7 +173,7 @@ export default function ProfilePage() {
       await supabase
         .from("profiles")
         .update({ username: tempUsername })
-        .eq("id", profile.id);
+        .eq("user_id", profile.user_id);
 
       await refreshProfile();
       setEditingUsername(false);
@@ -199,7 +199,7 @@ export default function ProfilePage() {
           skill_level: skillLevel,
           avoid_ingredients: avoidIngredients,
         })
-        .eq("id", profile.id);
+        .eq("user_id", profile.user_id);
 
       await refreshProfile();
       setMessage({ type: "success", text: t("messages.preferencesSaved") });

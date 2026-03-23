@@ -20,10 +20,10 @@ export default function SignUp() {
 
     const { data } = await supabase
       .from("profiles")
-      .select("id")
+      .select("user_id")
       .eq("username", username)
       .maybeSingle();
-
+    
     if (data) {
       setError("Username already taken");
       setLoading(false);

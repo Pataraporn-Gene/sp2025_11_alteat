@@ -345,6 +345,7 @@ function ChatbotPage() {
       setIsLoading(false);
     }
   };
+  
 
   const handleSuggestionClick = (suggestion: string) => setInput(suggestion);
 
