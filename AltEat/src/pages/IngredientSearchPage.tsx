@@ -291,7 +291,7 @@ function IngredientSearchpage() {
                       d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"
                     />
                   </svg>
-                  Filters
+                  {t('filters')}
                   {activeFilterCount > 0 && (
                     <span className="bg-white text-[#562C0C] rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold leading-none">
                       {activeFilterCount}
@@ -304,7 +304,7 @@ function IngredientSearchpage() {
                     onClick={() => setFilters({ taste: [], texture: [], color: [], shape: [] })}
                     className="text-sm text-[#562C0C]/60 underline"
                   >
-                    Clear all
+                    {t('clearAll')}
                   </button>
                 )}
               </div>

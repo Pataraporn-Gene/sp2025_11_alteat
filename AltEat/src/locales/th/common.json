@@ -14,5 +14,7 @@
   "showMore": "ดูเพิ่มเติม",
   "noResults": "ไม่พบผลลัพธ์",
   "tryAgain": "ลองอีกครั้ง",
-  "viewDetail": "ดูรายละเอียด"
+  "viewDetail": "ดูรายละเอียด",
+  "clearAll": "ล้างทั้งหมด",
+  "filters": "ตัวกรอง"
 }

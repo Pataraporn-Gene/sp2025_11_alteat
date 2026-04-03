@@ -14,5 +14,7 @@
   "showMore": "Show more",
   "noResults": "No results found",
   "tryAgain": "Try again",
-  "viewDetail": "View Detail"
+  "viewDetail": "View Detail",
+  "clearAll": "Clear all",
+  "filters": "Filters"
 }
