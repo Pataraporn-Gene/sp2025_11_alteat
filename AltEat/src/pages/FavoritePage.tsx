@@ -114,7 +114,14 @@ function FavoritePage() {
           ) : loading ? (
             <p className="mt-5 text-center text-2xl">{t('loadingFavorites')}</p>
           ) : favorites.length > 0 ? (
-            <RecipeCard recipes={favorites} />
+            <RecipeCard 
+              recipes={favorites} 
+              onFavoriteChange={(recipeId, isFav) => {
+                if (!isFav) {
+                  setFavorites(prev => prev.filter(r => r.id !== recipeId));
+                }
+              }}
+            />
           ) : (
             <div className="mt-10 flex flex-col items-center justify-center text-center bg-white/50 p-10 rounded-2xl shadow-lg border border-gray-200 backdrop-blur-sm">
               <Heart className="w-12 h-12 text-red-300 mb-3" />

@@ -35,7 +35,7 @@ export default function SignUp() {
       email,
       password,
       options: {
-        emailRedirectTo: "http://localhost:5173/profile",
+        emailRedirectTo: "https://sp2025-11-alteat.vercel.app/profile",
         data: { username },
       },
     });

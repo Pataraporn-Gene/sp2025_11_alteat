@@ -38,6 +38,10 @@ function RecipeSearchPage() {
   const activeFilterCount =
     filters.ingredient.length + filters.method.length + filters.cuisine.length
 
+  const clearAllFilters = () => {
+    setFilters({ ingredient: [], method: [], cuisine: [] })
+  }
+
   const openMobileFilters = () => {
     const btn = document.querySelector<HTMLButtonElement>('[aria-label="Open filters"]')
     btn?.click()
@@ -67,16 +71,19 @@ function RecipeSearchPage() {
       title: t("recipe:filters.ingredient"),
       category: "ingredient",
       items: recipeFilter[0].ingredient,
+      selectedItems: filters.ingredient,
     },
     {
       title: t("recipe:filters.method"),
       category: "method",
       items: recipeFilter[0].method,
+      selectedItems: filters.method,
     },
     {
       title: t("recipe:filters.cuisine"),
       category: "cuisine",
       items: recipeFilter[0].cuisine,
+      selectedItems: filters.cuisine,
     },
   ];
 
@@ -254,6 +261,28 @@ function RecipeSearchPage() {
                   />
                 </div>
 
+                {/* Desktop: Active filter pills & Clear all */}
+                {activeFilterCount > 0 && (
+                  <div className="hidden md:flex w-full justify-between items-center mt-6">
+                    <div className="flex flex-wrap gap-2">
+                      {[...filters.ingredient, ...filters.method, ...filters.cuisine].map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-4 py-2 bg-[#562C0C] text-white rounded-full text-xs font-small "
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <button
+                      onClick={clearAllFilters}
+                      className="text-sm text-[#562C0C] underline whitespace-nowrap ml-4"
+                    >
+                      Clear all
+                    </button>
+                  </div>
+                )}
+
                 {/* Mobile: Filter button + active pills — hidden on desktop */}
                 <div className="md:hidden w-full mt-4">
                   <div className="flex items-center gap-3 mb-3">
@@ -276,7 +305,7 @@ function RecipeSearchPage() {
 
                     {activeFilterCount > 0 && (
                       <button
-                        onClick={() => setFilters({ ingredient: [], method: [], cuisine: [] })}
+                        onClick={clearAllFilters}
                         className="text-sm text-[#562C0C]/60 underline"
                       >
                         Clear all

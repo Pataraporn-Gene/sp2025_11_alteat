@@ -5,12 +5,12 @@ interface FilterProps {
   title: string;
   category: string;
   items: string[];
+  selectedItems?: string[];
   onFilterChange: (filterType: string, selectedItems: string[]) => void;
 }
 
-function Filter({ title, category, items, onFilterChange }: FilterProps) {
+function Filter({ title, category, items, selectedItems = [], onFilterChange }: FilterProps) {
   const { t } = useTranslation(["common", "filter"]);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [expanded, setExpanded] = useState(false);
   const firstItems = items.slice(0, 6);
   const remainingItems = items.slice(6);
@@ -20,7 +20,6 @@ function Filter({ title, category, items, onFilterChange }: FilterProps) {
       ? selectedItems.filter((i) => i !== item)
       : [...selectedItems, item];
 
-    setSelectedItems(newSelected);
     onFilterChange(title, newSelected);
   };
 

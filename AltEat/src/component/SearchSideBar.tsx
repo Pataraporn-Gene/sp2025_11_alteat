@@ -6,6 +6,7 @@ interface FilterTag {
   title: string;
   category: string;
   items: string[];
+  selectedItems?: string[];
 }
 
 interface SearchSideBarProps {
@@ -58,6 +59,7 @@ function SearchSideBar({ filter, onFilterChange }: SearchSideBarProps) {
               title={tag.title}
               category={tag.category}
               items={tag.items}
+              selectedItems={tag.selectedItems}
               onFilterChange={onFilterChange}
             />
           ))}

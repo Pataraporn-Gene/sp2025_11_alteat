@@ -48,21 +48,25 @@ function IngredientSearchpage() {
       title: t("ingredient:filters.taste"),
       category: "taste",
       items: ingredientFilter[0].taste,
+      selectedItems: filters.taste,
     },
     {
       title: t("ingredient:filters.texture"),
       category: "texture",
       items: ingredientFilter[0].texture,
+      selectedItems: filters.texture,
     },
     {
       title: t("ingredient:filters.color"),
       category: "color",
       items: ingredientFilter[0].color,
+      selectedItems: filters.color,
     },
     {
       title: t("ingredient:filters.shape"),
       category: "shape",
       items: ingredientFilter[0].shape,
+      selectedItems: filters.shape,
     },
   ];
 
@@ -252,6 +256,28 @@ function IngredientSearchpage() {
                 onKeyDown={handleKeyPress}
               />
             </div>
+
+            {/* Desktop: Active filter pills & Clear all */}
+            {activeFilterCount > 0 && (
+              <div className="hidden md:flex w-full justify-between items-center mt-6">
+                <div className="flex flex-wrap gap-2">
+                  {[...filters.taste, ...filters.texture, ...filters.color, ...filters.shape].map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-4 py-2 bg-[#562C0C] text-white rounded-full text-xs font-small"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setFilters({ taste: [], texture: [], color: [], shape: [] })}
+                  className="text-sm text-[#562C0C] underline whitespace-nowrap ml-4"
+                >
+                  Clear all
+                </button>
+              </div>
+            )}
 
             {/* Mobile: Filter button + active pills — hidden on desktop */}
             <div className="md:hidden w-full mt-4">

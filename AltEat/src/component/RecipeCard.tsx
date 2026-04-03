@@ -14,9 +14,10 @@ export interface Recipe {
 
 interface RecipeCardProps {
   recipes: Recipe[];
+  onFavoriteChange?: (recipeId: number, isFavorite: boolean) => void;
 }
 
-function RecipeCard({ recipes }: RecipeCardProps) {
+function RecipeCard({ recipes, onFavoriteChange }: RecipeCardProps) {
   const navigate = useNavigate();
   const [favoriteRecipe, setFavoriteRecipe] = useState<number[]>([]);
   const {t} = useTranslation('common');
@@ -42,10 +43,12 @@ function RecipeCard({ recipes }: RecipeCardProps) {
         await removeFavorite(recipe.id);
         setFavoriteRecipe((prev) => prev.filter((id) => id !== recipe.id));
         console.log(`Remove ${recipe.title} from Favorite`);
+        onFavoriteChange?.(recipe.id, false);
       } else {
         await addFavorite(recipe.id);
         setFavoriteRecipe((prev) => [...prev, recipe.id]);
         console.log(`Add ${recipe.title} to Favorite`);
+        onFavoriteChange?.(recipe.id, true);
       }
     } catch (err) {
       console.error("Failed to toggle favorite:", err);
