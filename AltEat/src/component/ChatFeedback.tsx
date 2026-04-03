@@ -3,10 +3,9 @@ import { supabase } from "../lib/supabase"
 
 interface ChatFeedbackProps {
   messageId: string
-  sessionId: string
 }
 
-function ChatFeedback({ messageId, sessionId }: ChatFeedbackProps) {
+function ChatFeedback({ messageId }: ChatFeedbackProps) {
   const [feedback, setFeedback] = useState<"positive" | "negative" | null>(null)
   const [showComment, setShowComment] = useState(false)
   const [comment, setComment] = useState("")
@@ -19,7 +18,6 @@ function ChatFeedback({ messageId, sessionId }: ChatFeedbackProps) {
     try {
       const { error } = await supabase.from("chat_feedback").insert({
         message_id: messageId,
-        session_id: sessionId,
         is_helpful: feedbackType === "positive",
         comment: commentText || null,
       })

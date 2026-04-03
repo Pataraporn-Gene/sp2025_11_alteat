@@ -587,8 +587,8 @@ function ChatbotPage() {
                         <p className="whitespace-pre-wrap">{renderMessageText(msg.text || "")}</p>
                       </div>
                     )}
-                    {msg.role === "bot" && currentSessionId && (
-                      <ChatFeedback messageId={msg.id} sessionId={currentSessionId} />
+                    {msg.role === "bot" && (
+                      <ChatFeedback messageId={msg.id} />
                     )}
                   </div>
 
