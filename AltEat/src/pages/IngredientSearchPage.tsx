@@ -39,7 +39,9 @@ function IngredientSearchpage() {
     filters.shape.length;
 
   const openMobileFilters = () => {
-    const btn = document.querySelector<HTMLButtonElement>('[aria-label="Open filters"]');
+    const btn = document.querySelector<HTMLButtonElement>(
+      '[aria-label="Open filters"]',
+    );
     btn?.click();
   };
 
@@ -76,57 +78,6 @@ function IngredientSearchpage() {
     filters.color.length > 0 ||
     filters.shape.length > 0;
 
-  const fetchIngredients = useCallback(async () => {
-    if (!hasActiveFilters && !searchQuery.trim()) {
-      setIngredients([]);
-      return;
-    }
-
-    setLoading(true);
-    setHasSearched(true);
-
-    try {
-      let query = supabase.from("ingredients").select("*");
-
-      if (filters.taste.length > 0) {
-        query = query.contains("has_flavor", filters.taste);
-      }
-      if (filters.texture.length > 0) {
-        query = query.contains("has_texture", filters.texture);
-      }
-      if (filters.color.length > 0) {
-        query = query.contains("has_color", filters.color);
-      }
-      if (filters.shape.length > 0) {
-        query = query.contains("has_shape", filters.shape);
-      }
-
-      const { data, error } = await query;
-      console.log(query);
-      if (error) {
-        console.error("Error fetching ingredients:", error);
-        setIngredients([]);
-        return;
-      }
-
-      setIngredients(data || []);
-    } catch (err) {
-      console.error("Error:", err);
-      setIngredients([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters, hasActiveFilters, searchQuery]);
-
-  useEffect(() => {
-    if (hasActiveFilters) {
-      fetchIngredients();
-    } else if (!searchQuery.trim()) {
-      setIngredients([]);
-      setHasSearched(false);
-    }
-  }, [filters, hasActiveFilters]);
-
   const handleFilterChange = (filterType: string, selectedItems: string[]) => {
     console.log("Filter changed:", filterType, selectedItems);
 
@@ -148,8 +99,14 @@ function IngredientSearchpage() {
     }));
   };
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim() && !hasActiveFilters) return;
+  // Replace your fetchIngredients + handleSearch + useEffects with this:
+
+  const fetchIngredients = useCallback(async () => {
+    if (!searchQuery.trim() && !hasActiveFilters) {
+      setIngredients([]);
+      setHasSearched(false);
+      return;
+    }
 
     setLoading(true);
     setHasSearched(true);
@@ -158,23 +115,29 @@ function IngredientSearchpage() {
       const translatedQuery = await translateToEnglish(searchQuery);
       const terms = translatedQuery.split(" ").filter(Boolean);
 
-      let data: any[] | null = null;
-      let error: any = null;
+      let filtered: any[] = [];
 
       if (terms.length > 0) {
-        console.log("Searching with terms:", terms);
-        const res = await supabase.rpc("search_context_ingredients", { terms });
-        data = res.data;
-        error = res.error;
+        const { data, error } = await supabase.rpc(
+          "search_context_ingredients",
+          { terms },
+        );
+        if (error) {
+          console.error(error);
+          setIngredients([]);
+          return;
+        }
+        filtered = data || [];
+      } else {
+        // Filters only — fetch everything and let JS filter below
+        const { data, error } = await supabase.from("ingredients").select("*");
+        if (error) {
+          console.error(error);
+          setIngredients([]);
+          return;
+        }
+        filtered = data || [];
       }
-
-      if (error) {
-        console.error(error);
-        setIngredients([]);
-        return;
-      }
-
-      let filtered = data || [];
 
       if (filters.taste.length)
         filtered = filtered.filter((i) =>
@@ -200,6 +163,16 @@ function IngredientSearchpage() {
     } finally {
       setLoading(false);
     }
+  }, [filters, searchQuery, hasActiveFilters]); // ← reactive to both
+
+  // Single effect — fires on any filter or search change
+  useEffect(() => {
+    fetchIngredients();
+  }, [fetchIngredients]);
+
+  // handleSearch just delegates — no duplicate logic
+  const handleSearch = () => {
+    fetchIngredients();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -223,7 +196,6 @@ function IngredientSearchpage() {
         {/* Main content — takes full width on mobile, remaining width on desktop */}
         <div className="flex-1 flex justify-center">
           <div className="flex flex-col items-center mb-20 max-w-7xl w-full px-5 md:w-[85%] md:px-0">
-
             {/* Header */}
             <div className="flex items-center mb-5 w-full mt-4 md:mt-0">
               <div className="flex-1">
@@ -261,7 +233,12 @@ function IngredientSearchpage() {
             {activeFilterCount > 0 && (
               <div className="hidden md:flex w-full justify-between items-center mt-6">
                 <div className="flex flex-wrap gap-2">
-                  {[...filters.taste, ...filters.texture, ...filters.color, ...filters.shape].map((tag) => (
+                  {[
+                    ...filters.taste,
+                    ...filters.texture,
+                    ...filters.color,
+                    ...filters.shape,
+                  ].map((tag) => (
                     <span
                       key={tag}
                       className="px-4 py-2 bg-[#562C0C] text-white rounded-full text-xs font-small"
@@ -271,7 +248,9 @@ function IngredientSearchpage() {
                   ))}
                 </div>
                 <button
-                  onClick={() => setFilters({ taste: [], texture: [], color: [], shape: [] })}
+                  onClick={() =>
+                    setFilters({ taste: [], texture: [], color: [], shape: [] })
+                  }
                   className="text-sm text-[#562C0C] underline whitespace-nowrap ml-4"
                 >
                   Clear all
@@ -286,12 +265,20 @@ function IngredientSearchpage() {
                   onClick={openMobileFilters}
                   className="flex items-center gap-2 px-4 py-2 bg-[#562C0C] text-white rounded-full text-sm font-medium shadow-md active:scale-95 transition-transform"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
                       d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"
                     />
                   </svg>
-                  {t('filters')}
+                  {t("filters")}
                   {activeFilterCount > 0 && (
                     <span className="bg-white text-[#562C0C] rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold leading-none">
                       {activeFilterCount}
@@ -301,10 +288,17 @@ function IngredientSearchpage() {
 
                 {activeFilterCount > 0 && (
                   <button
-                    onClick={() => setFilters({ taste: [], texture: [], color: [], shape: [] })}
+                    onClick={() =>
+                      setFilters({
+                        taste: [],
+                        texture: [],
+                        color: [],
+                        shape: [],
+                      })
+                    }
                     className="text-sm text-[#562C0C]/60 underline"
                   >
-                    {t('clearAll')}
+                    {t("clearAll")}
                   </button>
                 )}
               </div>
@@ -312,7 +306,12 @@ function IngredientSearchpage() {
               {/* Active filter pills */}
               {activeFilterCount > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {[...filters.taste, ...filters.texture, ...filters.color, ...filters.shape].map((tag) => (
+                  {[
+                    ...filters.taste,
+                    ...filters.texture,
+                    ...filters.color,
+                    ...filters.shape,
+                  ].map((tag) => (
                     <span
                       key={tag}
                       className="px-3 py-1 bg-[#562C0C]/10 text-[#562C0C] rounded-full text-xs font-medium border border-[#562C0C]/20"
@@ -341,7 +340,10 @@ function IngredientSearchpage() {
                       stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                       />
                     </svg>
@@ -360,7 +362,10 @@ function IngredientSearchpage() {
                       stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
                         d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
