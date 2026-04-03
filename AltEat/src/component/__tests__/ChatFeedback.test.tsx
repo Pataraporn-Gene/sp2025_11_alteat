@@ -22,7 +22,7 @@ describe('ChatFeedback', () => {
   })
 
   it('renders the question and action buttons', () => {
-    render(<ChatFeedback messageId="msg-1" sessionId="session-1" />)
+    render(<ChatFeedback messageId="msg-1" />)
 
     expect(screen.getByText('Was this helpful?')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /yes/i })).toBeInTheDocument()
@@ -34,14 +34,13 @@ describe('ChatFeedback', () => {
     insertMock.mockResolvedValue({ error: null })
     const user = userEvent.setup()
 
-    render(<ChatFeedback messageId="msg-2" sessionId="session-2" />)
+    render(<ChatFeedback messageId="msg-2" />)
 
     await user.click(screen.getByRole('button', { name: /yes/i }))
 
     expect(fromMock).toHaveBeenCalledWith('chat_feedback')
     expect(insertMock).toHaveBeenCalledWith({
       message_id: 'msg-2',
-      session_id: 'session-2',
       is_helpful: true,
       comment: null,
     })
@@ -53,7 +52,7 @@ describe('ChatFeedback', () => {
     insertMock.mockResolvedValue({ error: null })
     const user = userEvent.setup()
 
-    render(<ChatFeedback messageId="msg-3" sessionId="session-3" />)
+    render(<ChatFeedback messageId="msg-3" />)
 
     await user.click(screen.getByRole('button', { name: /comment/i }))
     await user.click(screen.getByRole('button', { name: /no/i }))
@@ -63,7 +62,6 @@ describe('ChatFeedback', () => {
     expect(insertMock).toHaveBeenCalledTimes(1)
     expect(insertMock).toHaveBeenCalledWith({
       message_id: 'msg-3',
-      session_id: 'session-3',
       is_helpful: false,
       comment: 'Not accurate',
     })
