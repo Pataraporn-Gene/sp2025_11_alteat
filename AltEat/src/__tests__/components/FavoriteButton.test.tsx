@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import FavoriteButton from '../FavoriteButton'
+import FavoriteButton from '../../component/FavoriteButton'
 
 describe('FavoriteButton', () => {
   it('renders a toggle button with accessible label', () => {

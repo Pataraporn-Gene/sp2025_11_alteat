@@ -36,8 +36,10 @@ export function useRecommendedRecipes(currentRecipeId: number, cuisinePath: stri
 
         if (error) throw error;
 
-        // Filter and rank by similarity
-        const scoredRecipes = (data || []).map(recipe => {
+        // Filter out the current recipe defensively and rank by similarity
+        const scoredRecipes = (data || [])
+          .filter(recipe => recipe.id !== currentRecipeId)
+          .map(recipe => {
           let score = 0;
           
           // Check how many categories match
@@ -49,9 +51,8 @@ export function useRecommendedRecipes(currentRecipeId: number, cuisinePath: stri
 
           // Boost score with rating
           score += (recipe.rating || 0) / 10;
-
-          return { ...recipe, score };
-        });
+            return { ...recipe, score };
+          });
 
         // Sort by score and take top 5
         const recommended = scoredRecipes

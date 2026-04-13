@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import ScrollToTop from '../ScrollToTop'
+import ScrollToTop from '../../component/ScrollToTop'
 
 const locationState = vi.hoisted(() => ({ pathname: '/start' }))
 

@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import SearchSideBar from '../SearchSideBar'
+import SearchSideBar from '../../component/SearchSideBar'
 
-vi.mock('../Filter', () => ({
+vi.mock('../../component/Filter', () => ({
   default: ({ title, category, items, onFilterChange }: { title: string; category: string; items: string[]; onFilterChange: (filterType: string, selectedItems: string[]) => void }) => (
     <div>
       <h3>{title}</h3>

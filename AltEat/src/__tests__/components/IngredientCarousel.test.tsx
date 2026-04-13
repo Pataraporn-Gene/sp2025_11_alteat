@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import IngredientCarousel from '../IngredientCarousel'
-import type { IngredientDetail } from '../IngredientDetailPopup'
+import IngredientCarousel from '../../component/IngredientCarousel'
+import type { IngredientDetail } from '../../component/IngredientDetailPopup'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -10,7 +10,7 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
-vi.mock('../IngredientDetailPopup', () => ({
+vi.mock('../../component/IngredientDetailPopup', () => ({
   default: ({ ingredient, isOpen }: { ingredient: IngredientDetail | null; isOpen: boolean }) =>
     isOpen && ingredient ? <div data-testid="ingredient-popup">{ingredient.ingredient_name}</div> : null,
 }))

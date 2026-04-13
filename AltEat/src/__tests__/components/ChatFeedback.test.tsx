@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import ChatFeedback from '../ChatFeedback'
+import ChatFeedback from '../../component/ChatFeedback'
 
 const { insertMock, fromMock } = vi.hoisted(() => {
   const insert = vi.fn()

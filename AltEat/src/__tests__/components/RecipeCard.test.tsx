@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import RecipeCard, { type Recipe } from '../RecipeCard'
+import RecipeCard, { type Recipe } from '../../component/RecipeCard'
 
 const navigateMock = vi.hoisted(() => vi.fn())
 const favoriteMocks = vi.hoisted(() => ({
@@ -16,7 +16,7 @@ vi.mock('react-router-dom', () => ({
 
 vi.mock('../../lib/favorite', () => favoriteMocks)
 
-vi.mock('../FavoriteButton', () => ({
+vi.mock('../../component/FavoriteButton', () => ({
   default: ({ onToggle, recipeId, isFavorite }: { onToggle: () => void; recipeId: number; isFavorite: boolean }) => (
     <button type="button" onClick={onToggle}>
       {`favorite-${recipeId}-${isFavorite ? 'on' : 'off'}`}

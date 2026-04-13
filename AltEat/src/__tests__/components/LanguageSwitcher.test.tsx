@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import LanguageSwitcher from '../LanguageSwitcher'
+import LanguageSwitcher from '../../component/LanguageSwitcher'
 
 const i18nState = vi.hoisted(() => ({
   changeLanguage: vi.fn(),

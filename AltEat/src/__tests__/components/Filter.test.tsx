@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import Filter from '../Filter'
+import Filter from '../../component/Filter'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({

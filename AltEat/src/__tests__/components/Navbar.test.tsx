@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import Navbar from '../Navbar'
+import Navbar from '../../component/Navbar'
 
 const navigateMock = vi.hoisted(() => vi.fn())
 const profileState = vi.hoisted(() => ({
@@ -23,7 +23,7 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
-vi.mock('../LanguageSwitcher', () => ({
+vi.mock('../../component/LanguageSwitcher', () => ({
   default: () => <div>language-switcher</div>,
 }))
 
@@ -65,7 +65,7 @@ describe('Navbar', () => {
     const { container } = render(<Navbar />)
 
     const userButton = container.querySelector('button[type="button"]')
-    expect(screen.getByAltText('Profile')).toBeInTheDocument()
+    expect(screen.getAllByAltText('Profile')[0]).toBeInTheDocument()
 
     await user.click(userButton as HTMLButtonElement)
 
