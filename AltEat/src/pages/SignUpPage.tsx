@@ -70,6 +70,7 @@ export default function SignUp() {
                 <input
                     placeholder={t('signup.username')}
                     className="w-full border px-4 py-2 rounded"
+                    name = "username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
@@ -79,6 +80,7 @@ export default function SignUp() {
                     placeholder={t('signup.email')}
                     type="email"
                     className="w-full border px-4 py-2 rounded"
+                    name = "email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -88,6 +90,7 @@ export default function SignUp() {
                     placeholder={t('signup.password')}
                     type="password"
                     className="w-full border px-4 py-2 rounded"
+                    name = "password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -96,7 +99,8 @@ export default function SignUp() {
                 {error && <p className="text-red-500 text-sm">{error}</p>}
 
                 <button
-                    disabled={loading}
+                    type="submit"
+                    disabled={loading}  
                     className="w-full bg-[#e48f75] text-white py-2 rounded hover:bg-[#E6896D]"
                 >
                     {loading ? t('signup.signingUp') : t('signup.button')}

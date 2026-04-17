@@ -82,6 +82,7 @@ export default function Login() {
           <form onSubmit={handleLogin} className="space-y-4">
             <input
               type="email"
+              name="email"
               placeholder={t('login.email')}
               className="w-full border px-4 py-2 rounded focus:outline-none focus:ring-1"
               value={email}
@@ -91,6 +92,7 @@ export default function Login() {
 
             <input
               type="password"
+              name="password"
               placeholder={t('login.password')}
               className="w-full border px-4 py-2 rounded focus:outline-none focus:ring-1"
               value={password}

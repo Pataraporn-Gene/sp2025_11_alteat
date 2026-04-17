@@ -71,7 +71,7 @@ function RecipeCarousel({ recipes }: RecipeCarouselProps) {
   }
 
   return (
-    <div className="w-full max-w-2xl">
+    <div className="w-full max-w-2xl" data-testid="recipe-carousel">
       <div className="relative">
         {/* Previous Button */}
         {currentIndex > 0 && (

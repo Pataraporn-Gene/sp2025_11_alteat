@@ -62,10 +62,11 @@ function IngredientDetailPopup({ ingredient, tags, isOpen, onClose }: Ingredient
       padding: 0,
     }}
   >
-    <div className="relative bg-white border-5 border-[#EDAE9B] rounded-2xl p-6 sm:p-13 max-h-[85vh] overflow-y-auto">
+    <div data-testid="ingredient-detail-popup" className="relative bg-white border-5 border-[#EDAE9B] rounded-2xl p-6 sm:p-13 max-h-[85vh] overflow-y-auto">
 
       {/* Close button */}
       <button
+        data-testid="close-button"
         onClick={onClose}
         className="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
       >
@@ -74,11 +75,11 @@ function IngredientDetailPopup({ ingredient, tags, isOpen, onClose }: Ingredient
 
       {/* Header */}
       <div className="text-center mb-6 sm:mb-8">
-        <h2 className="text-2xl sm:text-4xl font-extrabold text-black">
+        <h2 data-testid="name" className="text-2xl sm:text-4xl font-extrabold text-black">
           {ingredient.ingredient_name}
         </h2>
 
-        <div className="mt-4 flex justify-center flex-wrap gap-2">
+        <div data-testid="tag" className="mt-4 flex justify-center flex-wrap gap-2">
           {tags?.map((tag) => (
             <span
               key={tag}

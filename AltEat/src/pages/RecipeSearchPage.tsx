@@ -71,19 +71,16 @@ function RecipeSearchPage() {
       title: t("recipe:filters.ingredient"),
       category: "ingredient",
       items: recipeFilter[0].ingredient,
-      selectedItems: filters.ingredient,
     },
     {
       title: t("recipe:filters.method"),
       category: "method",
       items: recipeFilter[0].method,
-      selectedItems: filters.method,
     },
     {
       title: t("recipe:filters.cuisine"),
       category: "cuisine",
       items: recipeFilter[0].cuisine,
-      selectedItems: filters.cuisine,
     },
   ];
 
@@ -224,7 +221,7 @@ function RecipeSearchPage() {
           <Navbar />
           <div className="flex">
             {/* Hide SearchSideBar's own floating button — we use our custom one instead */}
-            <div className="[&>button]:hidden sticky top-0 h-screen overflow-y-auto z-50">
+            <div className="[&>button]:hidden sticky top-0 h-screen overflow-y-auto">
               <SearchSideBar filter={filterSection} onFilterChange={handleFilterChange} />
             </div>
 
@@ -261,24 +258,14 @@ function RecipeSearchPage() {
                   />
                 </div>
 
-                {/* Desktop: Active filter pills & Clear all */}
+                {/* Desktop: Clear all filters */}
                 {activeFilterCount > 0 && (
-                  <div className="hidden md:flex w-full justify-between items-center mt-6">
-                    <div className="flex flex-wrap gap-2">
-                      {[...filters.ingredient, ...filters.method, ...filters.cuisine].map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-4 py-2 bg-[#562C0C] text-white rounded-full text-xs font-small "
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
+                  <div className="hidden md:flex w-full justify-end mt-3">
                     <button
                       onClick={clearAllFilters}
-                      className="text-sm text-[#562C0C] underline whitespace-nowrap ml-4"
+                      className="text-sm text-[#562C0C]/60 underline"
                     >
-                      {t('common:clearAll')}
+                      Clear all
                     </button>
                   </div>
                 )}
@@ -295,7 +282,7 @@ function RecipeSearchPage() {
                           d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"
                         />
                       </svg>
-                      {t('common:filters')}
+                      Filters
                       {activeFilterCount > 0 && (
                         <span className="bg-white text-[#562C0C] rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold leading-none">
                           {activeFilterCount}
@@ -308,7 +295,7 @@ function RecipeSearchPage() {
                         onClick={clearAllFilters}
                         className="text-sm text-[#562C0C]/60 underline"
                       >
-                        {t('common:clearAll')}
+                        Clear all
                       </button>
                     )}
                   </div>

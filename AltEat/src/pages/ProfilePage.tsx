@@ -620,7 +620,7 @@ export default function ProfilePage() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div role="dialog" aria-modal="true" className="modal fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl transform transition-all">
             <h3 className="text-lg font-semibold mb-4 border-b border-gray-200 pb-2">
               {t("delete.title")}
@@ -646,7 +646,7 @@ export default function ProfilePage() {
 
       {/* Success Modal */}
       {showDeleteSuccess && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div role="dialog" aria-modal="true" className="modal fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl transform transition-all text-center relative">
             <button
               onClick={handleFinalExit}

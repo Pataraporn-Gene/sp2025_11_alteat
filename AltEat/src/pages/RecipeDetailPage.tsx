@@ -182,6 +182,7 @@ export default function RecipeDetailPage() {
               {tags.map((tag, index) => (
                 <span
                   key={index}
+                  data-testid="tag"
                   className="px-4 py-1.5 bg-[#F5C55A] rounded-full text-sm text-[#694900] border border-gray-300"
                 >
                   {tag}
@@ -245,7 +246,7 @@ export default function RecipeDetailPage() {
               </h2>
               <ul className="space-y-2">
                 {ingredients.map((ingredient, index) => (
-                  <li key={index} className="text-[#562C0C] text-sm">
+                  <li key={index} data-testid="ingredient" className="text-[#562C0C] text-sm">
                     • {ingredient}
                   </li>
                 ))}
@@ -261,7 +262,7 @@ export default function RecipeDetailPage() {
               </h2>
               <ol className="space-y-4">
                 {steps.map((step, index) => (
-                  <li key={index} className="flex gap-4">
+                  <li key={index} data-testid="step" className="flex gap-4">
                     <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[#FBB496] flex items-center justify-center text-sm font-semibold text-gray-800">
                       {index + 1}
                     </span>
@@ -318,7 +319,7 @@ export default function RecipeDetailPage() {
         </main>
 
         {/* Right Sidebar - Recommended Recipes */}
-        <aside className="hidden lg:block w-80 p-6 border-l border-gray-200 sticky top-0 h-screen overflow-y-auto flex-shrink-0 bg-[#F5F5F5]">
+        <aside data-testid="recommended" className="hidden lg:block w-80 p-6 border-l border-gray-200 sticky top-0 h-screen overflow-y-auto flex-shrink-0 bg-[#F5F5F5]">
           <h2 className="text-xl font-semibold text-black mb-6">
             {t('detail.recommended')}
           </h2>

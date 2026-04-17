@@ -13,6 +13,8 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     setupFiles: './src/test/setup.ts',
+    include: ['src/__tests__/**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['tests/**', 'playwright/**', 'test-results/**', 'playwright-report/**'],
     css: true,
     coverage: {
       provider: 'v8',

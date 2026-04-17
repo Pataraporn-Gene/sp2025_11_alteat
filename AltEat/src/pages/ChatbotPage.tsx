@@ -34,8 +34,8 @@ interface ChatSession {
   created_at: string;
 }
 
-const N8N_WEBHOOK_URL = "https://primary-production-6fdb0.up.railway.app/webhook/f1725c42-d6af-4b84-adba-86fb367f9f3b/chat";
-// const N8N_WEBHOOK_URL = "http://localhost:5678/webhook/f1725c42-d6af-4b84-adba-86fb367f9f3b/chat";
+// const N8N_WEBHOOK_URL = "https://primary-production-6fdb0.up.railway.app/webhook/f1725c42-d6af-4b84-adba-86fb367f9f3b/chat";
+const N8N_WEBHOOK_URL = "http://localhost:5678/webhook/f1725c42-d6af-4b84-adba-86fb367f9f3b/chat";
 
 function ChatbotPage() {
   const { t } = useTranslation("chatbot");
@@ -414,6 +414,7 @@ function ChatbotPage() {
                   setIsSidebarOpen(!isSidebarOpen); // desktop: collapse
                 }
               }}
+              aria-label="Toggle history"
               className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#FFCB69] transition text-gray-500"
             >
               {isSidebarOpen ? "⟨" : "⟩"}
@@ -444,6 +445,7 @@ function ChatbotPage() {
               {sessions.map((session) => (
                 <li
                   key={session.session_id}
+                  data-testid="history-item"
                   onClick={() =>
                     editingSessionId !== session.session_id &&
                     handleSessionClick(session.session_id)
@@ -532,6 +534,7 @@ function ChatbotPage() {
           {/* Mobile history button */}
           <button
             onClick={() => setMobileSidebarOpen(true)}
+            aria-label="Toggle history"
             className="md:hidden absolute top-3 left-3 z-30 flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full shadow-md text-sm font-medium text-gray-700"
           >
             <History className="w-4 h-4 text-[#FFCB69]" />
@@ -569,6 +572,7 @@ function ChatbotPage() {
               {messages.map((msg) => (
                 <div
                   key={msg.id}
+                  data-testid="message"
                   className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   {msg.role === "bot" && (
@@ -636,6 +640,7 @@ function ChatbotPage() {
                 />
                 <button
                   onClick={() => handleSend()}
+                  aria-label="Send message"
                   disabled={!input.trim() || isLoading}
                   className="ml-2 w-8 h-8 bg-[#FFCB69] rounded-full flex items-center justify-center hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
                 >

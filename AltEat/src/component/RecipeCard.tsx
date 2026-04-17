@@ -63,7 +63,8 @@ function RecipeCard({ recipes, onFavoriteChange }: RecipeCardProps) {
         {recipes.map((recipe) => (
           <div
             key={recipe.id}
-            className="bg-white rounded-2xl shadow-[0_3px_2px_rgba(0,0,0,0.25)]"
+            data-testid="recipe-card"
+            className="recipe-card bg-white rounded-2xl shadow-[0_3px_2px_rgba(0,0,0,0.25)]"
           >
             {/* Recipe Image */}
             <div className="relative">
