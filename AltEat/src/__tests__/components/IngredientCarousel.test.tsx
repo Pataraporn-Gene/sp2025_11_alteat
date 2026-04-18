@@ -71,4 +71,12 @@ describe('IngredientCarousel', () => {
 
     expect(screen.getByTestId('ingredient-popup')).toHaveTextContent('Apple')
   })
+
+  it('renders substitution items from ingredient results', () => {
+    render(<IngredientCarousel ingredients={ingredients} />)
+
+    expect(screen.getByText('Apple')).toBeInTheDocument()
+    expect(screen.getByText('Banana')).toBeInTheDocument()
+    expect(screen.getByText('Carrot')).toBeInTheDocument()
+  })
 })
