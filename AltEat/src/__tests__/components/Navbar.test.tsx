@@ -1,74 +1,84 @@
-import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import Navbar from '../../component/Navbar'
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import Navbar from "../../component/Navbar";
 
-const navigateMock = vi.hoisted(() => vi.fn())
+const navigateMock = vi.hoisted(() => vi.fn());
 const profileState = vi.hoisted(() => ({
   profile: null as { avatar_url?: string } | null,
-}))
+}));
 
-vi.mock('react-router-dom', () => ({
-  Link: ({ to, children }: { to: string; children: React.ReactNode }) => <a href={to}>{children}</a>,
+vi.mock("react-router-dom", () => ({
+  Link: ({ to, children }: { to: string; children: React.ReactNode }) => (
+    <a href={to}>{children}</a>
+  ),
   useNavigate: () => navigateMock,
-}))
+}));
 
-vi.mock('../../context/ProfileContext', () => ({
+vi.mock("../../context/ProfileContext", () => ({
   useProfile: () => profileState,
-}))
+}));
 
-vi.mock('react-i18next', () => ({
+vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
-}))
+}));
 
-vi.mock('../../component/LanguageSwitcher', () => ({
+vi.mock("../../component/LanguageSwitcher", () => ({
   default: () => <div>language-switcher</div>,
-}))
+}));
 
-vi.mock('../../assets/logo.png', () => ({
-  default: 'logo.png',
-}))
+vi.mock("../../assets/logo.png", () => ({
+  default: "logo.png",
+}));
 
-describe('Navbar', () => {
+describe("Navbar", () => {
   beforeEach(() => {
-    navigateMock.mockReset()
-    profileState.profile = null
-  })
+    navigateMock.mockReset();
+    profileState.profile = null;
+  });
 
-  it('renders navigation links', () => {
-    render(<Navbar />)
+  it("renders navigation links", () => {
+    render(<Navbar />);
 
-    expect(screen.getByText('aboutUs')).toBeInTheDocument()
-    expect(screen.getByText('recipes')).toBeInTheDocument()
-    expect(screen.getByText('ingredients')).toBeInTheDocument()
-    expect(screen.getByText('chatbot')).toBeInTheDocument()
-    expect(screen.getByText('language-switcher')).toBeInTheDocument()
-  })
+    expect(screen.getByText("aboutUs")).toBeInTheDocument();
+    expect(screen.getByText("recipes")).toBeInTheDocument();
+    expect(screen.getByText("ingredients")).toBeInTheDocument();
+    expect(screen.getByText("chatbot")).toBeInTheDocument();
+    expect(screen.getByText("language-switcher")).toBeInTheDocument();
 
-  it('navigates to login when user is not authenticated', async () => {
-    const user = userEvent.setup()
-    const { container } = render(<Navbar />)
+    const logo = screen.getByAltText("Logo");
+    expect(logo).toBeInTheDocument();
+    expect(logo.closest("a")).toHaveAttribute("href", "/");
 
-    const userButton = container.querySelector('button[type="button"]')
-    expect(userButton).toBeTruthy()
+    const favoriteLink = document.querySelector('a[href="/favorite"]');
+    expect(favoriteLink).toBeInTheDocument();
+    expect(favoriteLink).toHaveAttribute("href", "/favorite");
+  });
 
-    await user.click(userButton as HTMLButtonElement)
+  it("navigates to login when user is not authenticated", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<Navbar />);
 
-    expect(navigateMock).toHaveBeenCalledWith('/login')
-  })
+    const userButton = container.querySelector('button[type="button"]');
+    expect(userButton).toBeTruthy();
 
-  it('navigates to profile when user is authenticated', async () => {
-    profileState.profile = { avatar_url: '/avatar.png' }
-    const user = userEvent.setup()
-    const { container } = render(<Navbar />)
+    await user.click(userButton as HTMLButtonElement);
 
-    const userButton = container.querySelector('button[type="button"]')
-    expect(screen.getAllByAltText('Profile')[0]).toBeInTheDocument()
+    expect(navigateMock).toHaveBeenCalledWith("/login");
+  });
 
-    await user.click(userButton as HTMLButtonElement)
+  it("navigates to profile when user is authenticated", async () => {
+    profileState.profile = { avatar_url: "/avatar.png" };
+    const user = userEvent.setup();
+    const { container } = render(<Navbar />);
 
-    expect(navigateMock).toHaveBeenCalledWith('/profile')
-  })
-})
+    const userButton = container.querySelector('button[type="button"]');
+    expect(screen.getAllByAltText("Profile")[0]).toBeInTheDocument();
+
+    await user.click(userButton as HTMLButtonElement);
+
+    expect(navigateMock).toHaveBeenCalledWith("/profile");
+  });
+});

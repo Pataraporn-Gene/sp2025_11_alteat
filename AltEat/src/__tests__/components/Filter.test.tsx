@@ -50,6 +50,30 @@ describe('Filter', () => {
     expect(screen.getByText('filter:diet.g').closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'false')
   })
 
+  it('collapses back to first six items when clicking show less', async () => {
+    const items = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+    const user = userEvent.setup()
+
+    render(
+      <Filter
+        title="Diet"
+        category="diet"
+        items={items}
+        onFilterChange={() => {}}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'showMore' }))
+
+    expect(screen.getByText('filter:diet.g').closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'false')
+
+    await user.click(screen.getByRole('button', { name: 'showLess' }))
+
+    expect(screen.getByText('filter:diet.g').closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'true')
+    expect(screen.getByRole('button', { name: 'showMore' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'showLess' })).not.toBeInTheDocument()
+  })
+
   it('calls onFilterChange when an item is toggled', async () => {
     const onFilterChange = vi.fn()
     const user = userEvent.setup()
