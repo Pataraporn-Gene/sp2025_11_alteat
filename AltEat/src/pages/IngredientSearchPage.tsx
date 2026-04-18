@@ -78,6 +78,10 @@ function IngredientSearchpage() {
     filters.color.length > 0 ||
     filters.shape.length > 0;
 
+  const clearAllFilters = () => {
+    setFilters({ taste: [], texture: [], color: [], shape: [] });
+  };
+
   const handleFilterChange = (filterType: string, selectedItems: string[]) => {
     console.log("Filter changed:", filterType, selectedItems);
 
@@ -234,23 +238,33 @@ function IngredientSearchpage() {
               <div className="hidden md:flex w-full justify-between items-center mt-6">
                 <div className="flex flex-wrap gap-2">
                   {[
-                    ...filters.taste,
-                    ...filters.texture,
-                    ...filters.color,
-                    ...filters.shape,
-                  ].map((tag) => (
+                    ...filters.taste.map((item) => ({
+                      item,
+                      category: "taste",
+                    })),
+                    ...filters.texture.map((item) => ({
+                      item,
+                      category: "texture",
+                    })),
+                    ...filters.color.map((item) => ({
+                      item,
+                      category: "color",
+                    })),
+                    ...filters.shape.map((item) => ({
+                      item,
+                      category: "shape",
+                    })),
+                  ].map(({ item, category }) => (
                     <span
-                      key={tag}
+                      key={item}
                       className="px-4 py-2 bg-[#562C0C] text-white rounded-full text-xs font-small"
                     >
-                      {tag}
+                      {t(`filter:${category}.${item}`)}
                     </span>
                   ))}
                 </div>
                 <button
-                  onClick={() =>
-                    setFilters({ taste: [], texture: [], color: [], shape: [] })
-                  }
+                  onClick={clearAllFilters}
                   className="text-sm text-[#562C0C] underline whitespace-nowrap ml-4"
                 >
                   {t("common:clearAll")}

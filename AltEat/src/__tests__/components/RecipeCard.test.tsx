@@ -1,73 +1,110 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import RecipeCard, { type Recipe } from '../../component/RecipeCard'
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import RecipeCard, { type Recipe } from "../../component/RecipeCard";
 
-const navigateMock = vi.hoisted(() => vi.fn())
+const navigateMock = vi.hoisted(() => vi.fn());
 const favoriteMocks = vi.hoisted(() => ({
   addFavorite: vi.fn(),
   removeFavorite: vi.fn(),
   getFavoriteIds: vi.fn(),
-}))
+}));
 
-vi.mock('react-router-dom', () => ({
+vi.mock("react-router-dom", () => ({
   useNavigate: () => navigateMock,
-}))
+}));
 
-vi.mock('../../lib/favorite', () => favoriteMocks)
+vi.mock("../../lib/favorite", () => favoriteMocks);
 
-vi.mock('../../component/FavoriteButton', () => ({
-  default: ({ onToggle, recipeId, isFavorite }: { onToggle: () => void; recipeId: number; isFavorite: boolean }) => (
+vi.mock("../../component/FavoriteButton", () => ({
+  default: ({
+    onToggle,
+    recipeId,
+    isFavorite,
+  }: {
+    onToggle: () => void;
+    recipeId: number;
+    isFavorite: boolean;
+  }) => (
     <button type="button" onClick={onToggle}>
-      {`favorite-${recipeId}-${isFavorite ? 'on' : 'off'}`}
+      {`favorite-${recipeId}-${isFavorite ? "on" : "off"}`}
     </button>
   ),
-}))
+}));
 
-vi.mock('react-i18next', () => ({
+vi.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),
-}))
+}));
 
-describe('RecipeCard', () => {
+describe("RecipeCard", () => {
   const recipes: Recipe[] = [
-    { id: 1, title: 'Pad Thai', image: '/pad-thai.png', tags: ['noodles'] },
-    { id: 2, title: 'Green Curry', image: '/curry.png', tags: ['spicy'] },
-  ]
+    { id: 1, title: "Pad Thai", image: "", tags: ["noodles"] },
+    { id: 2, title: "Green Curry", image: "", tags: ["spicy"] },
+  ];
 
   beforeEach(() => {
-    navigateMock.mockReset()
-    favoriteMocks.addFavorite.mockReset()
-    favoriteMocks.removeFavorite.mockReset()
-    favoriteMocks.getFavoriteIds.mockReset()
-  })
+    navigateMock.mockReset();
+    favoriteMocks.addFavorite.mockReset();
+    favoriteMocks.removeFavorite.mockReset();
+    favoriteMocks.getFavoriteIds.mockReset();
+  });
 
-  it('loads favorites and toggles them', async () => {
-    favoriteMocks.getFavoriteIds.mockResolvedValue([1])
-    const user = userEvent.setup()
+  it("loads favorites and toggles them", async () => {
+    favoriteMocks.getFavoriteIds.mockResolvedValue([1]);
+    const user = userEvent.setup();
 
-    render(<RecipeCard recipes={recipes} />)
+    render(<RecipeCard recipes={recipes} />);
 
-    await waitFor(() => expect(favoriteMocks.getFavoriteIds).toHaveBeenCalled())
+    await waitFor(() =>
+      expect(favoriteMocks.getFavoriteIds).toHaveBeenCalled(),
+    );
 
-    expect(await screen.findByText('favorite-1-on')).toBeInTheDocument()
+    expect(await screen.findByText("favorite-1-on")).toBeInTheDocument();
 
-    await user.click(screen.getByText('favorite-1-on'))
-    await user.click(screen.getByText('favorite-2-off'))
+    await user.click(screen.getByText("favorite-1-on"));
+    await user.click(screen.getByText("favorite-2-off"));
 
-    expect(favoriteMocks.removeFavorite).toHaveBeenCalledWith(1)
-    expect(favoriteMocks.addFavorite).toHaveBeenCalledWith(2)
-  })
+    expect(favoriteMocks.removeFavorite).toHaveBeenCalledWith(1);
+    expect(favoriteMocks.addFavorite).toHaveBeenCalledWith(2);
+  });
 
-  it('navigates to recipe detail when clicking more', async () => {
-    favoriteMocks.getFavoriteIds.mockResolvedValue([])
-    const user = userEvent.setup()
+  it("navigates to recipe detail when clicking more", async () => {
+    favoriteMocks.getFavoriteIds.mockResolvedValue([]);
+    const user = userEvent.setup();
 
-    render(<RecipeCard recipes={recipes} />)
+    render(<RecipeCard recipes={recipes} />);
 
-    await user.click(screen.getAllByRole('button', { name: 'more' })[0])
+    await user.click(screen.getAllByRole("button", { name: "more" })[0]);
 
-    expect(navigateMock).toHaveBeenCalledWith('/recipe/1')
-  })
-})
+    expect(navigateMock).toHaveBeenCalledWith("/recipe/1");
+  });
+
+  it("renders recipe image with correct src and alt text", async () => {
+    favoriteMocks.getFavoriteIds.mockResolvedValue([]);
+
+    render(<RecipeCard recipes={recipes} />);
+
+    const padThaiImage = screen.getByRole("img", { name: "Pad Thai" });
+    expect(padThaiImage).toBeInTheDocument();
+    expect(padThaiImage).toHaveAttribute("src", "https://yrpoikxovgaplilgwfys.supabase.co/storage/v1/object/public/recipe-img/1.jpg");
+    expect(padThaiImage).toHaveAttribute("alt", "Pad Thai");
+
+    const curryImage = screen.getByRole("img", { name: "Green Curry" });
+    expect(curryImage).toBeInTheDocument();
+    expect(curryImage).toHaveAttribute("src", "https://yrpoikxovgaplilgwfys.supabase.co/storage/v1/object/public/recipe-img/2.jpg");
+    expect(curryImage).toHaveAttribute("alt", "Green Curry");
+  });
+
+  it("shows placeholder when image fails to load", async () => {
+    favoriteMocks.getFavoriteIds.mockResolvedValue([]);
+
+    render(<RecipeCard recipes={recipes} />);
+
+    const padThaiImage = screen.getByRole("img", { name: "Pad Thai" });
+    fireEvent.error(padThaiImage);
+
+    expect(padThaiImage).toHaveAttribute("src", "/placeholder.svg");
+  });
+});

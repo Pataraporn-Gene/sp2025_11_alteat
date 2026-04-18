@@ -48,11 +48,29 @@ describe('ChatFeedback', () => {
     expect(await screen.findByText(/thank you for your feedback/i)).toBeInTheDocument()
   })
 
-  it('submits comment feedback after selecting a choice', async () => {
+  it('submits negative feedback and shows thank you message', async () => {
     insertMock.mockResolvedValue({ error: null })
     const user = userEvent.setup()
 
     render(<ChatFeedback messageId="msg-3" />)
+
+    await user.click(screen.getByRole('button', { name: /no/i }))
+
+    expect(fromMock).toHaveBeenCalledWith('chat_feedback')
+    expect(insertMock).toHaveBeenCalledWith({
+      message_id: 'msg-3',
+      is_helpful: false,
+      comment: null,
+    })
+
+    expect(await screen.findByText(/thank you for your feedback/i)).toBeInTheDocument()
+  })
+
+  it('submits comment feedback after selecting a choice', async () => {
+    insertMock.mockResolvedValue({ error: null })
+    const user = userEvent.setup()
+
+    render(<ChatFeedback messageId="msg-4" />)
 
     await user.click(screen.getByRole('button', { name: /comment/i }))
     await user.click(screen.getByRole('button', { name: /no/i }))
@@ -61,7 +79,7 @@ describe('ChatFeedback', () => {
 
     expect(insertMock).toHaveBeenCalledTimes(1)
     expect(insertMock).toHaveBeenCalledWith({
-      message_id: 'msg-3',
+      message_id: 'msg-4',
       is_helpful: false,
       comment: 'Not accurate',
     })
