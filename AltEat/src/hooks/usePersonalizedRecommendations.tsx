@@ -40,7 +40,7 @@ export function usePersonalizedRecommendations(limit: number = 6) {
         const { data: profileData } = await supabase
           .from("profiles")
           .select("cuisine_preferences, skill_level, avoid_ingredients")
-          .eq("id", user.id)
+          .eq("user_id", user.id)
           .single();
 
         if (profileData) {

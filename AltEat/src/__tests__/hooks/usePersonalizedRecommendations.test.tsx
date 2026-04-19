@@ -84,6 +84,7 @@ describe('usePersonalizedRecommendations', () => {
     expect(supabase.auth.getUser).toHaveBeenCalled()
     expect(supabase.from).toHaveBeenCalledWith('profiles')
     expect(supabase.from).toHaveBeenCalledWith('recipes')
+    expect(eqMock).toHaveBeenCalledWith('user_id', 'user-123')
     
     // Thai recipe should rank ahead of non-matching cuisine recipes
     expect(result.current.recipes[0].title).toBe('Thai Green Curry')
