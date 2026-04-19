@@ -107,4 +107,18 @@ describe("RecipeCard", () => {
 
     expect(padThaiImage).toHaveAttribute("src", "/placeholder.svg");
   });
+
+  it('renders recipe name, tags, and more button', async () => {
+    favoriteMocks.getFavoriteIds.mockResolvedValue([])
+
+    render(<RecipeCard recipes={recipes} />)
+
+    expect(screen.getByText('Pad Thai')).toBeInTheDocument()
+    expect(screen.getByText('Green Curry')).toBeInTheDocument()
+    expect(screen.getByText('noodles')).toBeInTheDocument()
+    expect(screen.getByText('spicy')).toBeInTheDocument()
+
+    const moreButtons = screen.getAllByRole('button', { name: 'more' })
+    expect(moreButtons).toHaveLength(2)
+  })
 });

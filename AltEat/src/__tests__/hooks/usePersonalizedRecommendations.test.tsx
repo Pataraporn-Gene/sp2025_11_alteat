@@ -113,4 +113,48 @@ describe('usePersonalizedRecommendations', () => {
     expect(result.current.error).toBe('Auth error')
     expect(result.current.recipes[0].id).toBe(5)
   })
+  
+  it('should skip profile fetch and return recipes when user is not authenticated', async () => {
+    (supabase.auth.getUser as any).mockResolvedValueOnce({
+      data: { user: null },
+    })
+
+    const { result } = renderHook(() => usePersonalizedRecommendations(3))
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    // Should never query profiles
+    expect(supabase.from).not.toHaveBeenCalledWith('profiles')
+
+    // Should still return recipes from rpc fallback
+    expect(result.current.recipes.length).toBeGreaterThan(0)
+    expect(result.current.error).toBeNull()
+  })
+
+  it('should deduplicate recipes returned from multiple sources', async () => {
+    const duplicateRecipe = {
+      id: 4,
+      recipe_name: 'Random Recipe',
+      cuisine_path: 'random',
+      ingredients: 'beef',
+      img_src: '',
+      rating: 4.0,
+    }
+
+    // Both cuisine query and rpc return the same recipe
+    limitMock.mockResolvedValue({ data: [duplicateRecipe], error: null })
+    ;(supabase.rpc as any).mockResolvedValue({ data: [duplicateRecipe], error: null })
+
+    const { result } = renderHook(() => usePersonalizedRecommendations(5))
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    const ids = result.current.recipes.map(r => r.id)
+    const uniqueIds = new Set(ids)
+    expect(ids.length).toBe(uniqueIds.size)
+  })
 })

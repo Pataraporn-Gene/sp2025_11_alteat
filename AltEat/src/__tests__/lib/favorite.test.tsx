@@ -80,6 +80,11 @@ describe('favorite lib', () => {
       expect(eqMock1).toHaveBeenCalledWith('user_id', mockUser.id);
       expect(eqMock2).toHaveBeenCalledWith('recipe_id', 1);
     })
+
+    it('should throw error if delete fails', async () => {
+      eqMock2.mockResolvedValueOnce({ error: new Error('Delete failed') })
+      await expect(removeFavorite(1)).rejects.toThrow('Delete failed')
+    })
   })
 
   describe('getFavoriteIds', () => {

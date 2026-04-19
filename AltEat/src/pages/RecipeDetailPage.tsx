@@ -170,7 +170,7 @@ export default function RecipeDetailPage() {
                   recipeId={recipe.id}
                   isFavorite={isFavorite(recipe.id)}
                   onToggle={() => toggleFavorite({ id: recipe.id, title: recipe.recipe_name })}
-                  size={24}
+                  size={30}
                 />
               </div>
             </div>
@@ -303,7 +303,7 @@ export default function RecipeDetailPage() {
                       <img
                         src={recipeItem.img_src}
                         alt={recipeItem.recipe_name}
-                        className="w-full h-32 object-cover"
+                        className="w-full h-32 object-cover rounded-lg"
                         onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
                       />
                       <div className="p-2 text-center">
@@ -344,7 +344,7 @@ export default function RecipeDetailPage() {
                       <img
                         src={recipeItem.img_src}
                         alt={recipeItem.recipe_name}
-                        className="w-full h-40 object-cover rounded-lg"
+                        className="w-full h-40 object-cover rounded-tl-lg rounded-tr-lg"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.src = "/placeholder.svg";
@@ -360,7 +360,7 @@ export default function RecipeDetailPage() {
                               title: recipeItem.recipe_name,
                             })
                           }
-                          size={6}
+                          size={26}
                         />
                       </div>
                     </div>

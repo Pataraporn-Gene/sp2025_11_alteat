@@ -25,5 +25,10 @@ describe('ScrollToTop', () => {
     rerender(<ScrollToTop />)
 
     expect(scrollToMock).toHaveBeenCalledTimes(2)
+    expect(scrollToMock).toHaveBeenLastCalledWith({
+      top: 0,
+      left: 0,
+      behavior: 'instant',
+    })
   })
 })

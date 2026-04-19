@@ -75,4 +75,76 @@ describe('useRecommendedRecipes', () => {
     expect(result.current.error).toBe('Database error')
     expect(result.current.recipes).toEqual([])
   })
+
+  it('should exclude current recipe from results', async () => {
+    const mockRecipes = [
+      { id: 1, recipe_name: 'Current Recipe', cuisine_path: 'thai/curry', img_src: '', rating: 4.0 },
+      { id: 2, recipe_name: 'Recipe A', cuisine_path: 'thai/curry', img_src: '', rating: 4.5 },
+      { id: 3, recipe_name: 'Recipe B', cuisine_path: 'thai/soup', img_src: '', rating: 3.5 },
+      { id: 4, recipe_name: 'Recipe C', cuisine_path: 'italian/pasta', img_src: '', rating: 4.0 },
+      { id: 5, recipe_name: 'Recipe D', cuisine_path: 'thai/salad', img_src: '', rating: 3.0 },
+    ]
+
+    limitMock.mockResolvedValue({ data: mockRecipes, error: null })
+
+    const { result } = renderHook(() => useRecommendedRecipes(1, 'thai/curry'))
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    expect(result.current.recipes.some(r => r.id === 1)).toBe(false)
+  })
+
+  it('should rank recipes with more category matches higher', async () => {
+    const mockRecipes = [
+      { id: 2, recipe_name: 'Full Match', cuisine_path: 'asian/thai', img_src: '', rating: 3.0 },
+      { id: 3, recipe_name: 'Partial Match', cuisine_path: 'asian/italian', img_src: '', rating: 3.0 },
+      { id: 4, recipe_name: 'No Match', cuisine_path: 'mexican/taco', img_src: '', rating: 3.0 },
+    ]
+
+    limitMock.mockResolvedValue({ data: mockRecipes, error: null })
+
+    const { result } = renderHook(() => useRecommendedRecipes(1, 'asian/thai'))
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    // Full match (asian + thai = 2pts) > Partial match (asian = 1pt) > No match (0pt)
+    expect(result.current.recipes[0].id).toBe(2)
+    expect(result.current.recipes[1].id).toBe(3)
+    expect(result.current.recipes[2].id).toBe(4)
+  })
+
+  it('should boost ranking by rating when cuisine match is equal', async () => {
+    const mockRecipes = [
+      { id: 2, recipe_name: 'Low Rated', cuisine_path: 'thai/curry', img_src: '', rating: 2.0 },
+      { id: 3, recipe_name: 'High Rated', cuisine_path: 'thai/curry', img_src: '', rating: 5.0 },
+    ]
+
+    limitMock.mockResolvedValue({ data: mockRecipes, error: null })
+
+    const { result } = renderHook(() => useRecommendedRecipes(1, 'thai/curry'))
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    // Same cuisine match, so higher rating wins
+    expect(result.current.recipes[0].id).toBe(3)
+    expect(result.current.recipes[1].id).toBe(2)
+  })
+
+  it('should return at most 5 recipes', async () => {
+    const mockRecipes = Array.from({ length: 20 }, (_, i) => ({
+      id: i + 2,
+      recipe_name: `Recipe ${i + 2}`,
+      cuisine_path: 'thai/curry',
+      img_src: '',
+      rating: 4.0,
+    }))
+
+    limitMock.mockResolvedValue({ data: mockRecipes, error: null })
+
+    const { result } = renderHook(() => useRecommendedRecipes(1, 'thai/curry'))
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    expect(result.current.recipes.length).toBeLessThanOrEqual(5)
+  })
 })

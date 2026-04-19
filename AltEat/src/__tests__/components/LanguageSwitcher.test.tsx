@@ -32,7 +32,7 @@ describe('LanguageSwitcher', () => {
     expect(i18nState.changeLanguage).toHaveBeenCalledWith('en')
   })
 
-  it('highlights the active language', () => {
+  it('highlights the TH button when TH is the active language', () => {
     i18nState.language = 'th'
 
     render(<LanguageSwitcher />)
@@ -40,4 +40,12 @@ describe('LanguageSwitcher', () => {
     expect(screen.getByRole('button', { name: 'TH' })).toHaveClass('font-bold')
     expect(screen.getByRole('button', { name: 'EN' })).not.toHaveClass('font-bold')
   })
+
+  it('highlights the EN button when EN is the active language', () => {
+  i18nState.language = 'en'
+  render(<LanguageSwitcher />)
+
+  expect(screen.getByRole('button', { name: 'EN' })).toHaveClass('font-bold')
+  expect(screen.getByRole('button', { name: 'TH' })).not.toHaveClass('font-bold')
+})
 })

@@ -91,4 +91,23 @@ describe('Filter', () => {
 
     expect(onFilterChange).toHaveBeenCalledWith('Diet', ['a'])
   })
+
+  it('calls onFilterChange with item removed when an already-selected item is clicked', async () => {
+    const onFilterChange = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <Filter
+        title="Diet"
+        category="diet"
+        items={['a', 'b']}
+        selectedItems={['a']}
+        onFilterChange={onFilterChange}
+      />,
+    )
+
+    await user.click(screen.getByText('filter:diet.a'))
+
+    expect(onFilterChange).toHaveBeenCalledWith('Diet', [])
+  })
 })
