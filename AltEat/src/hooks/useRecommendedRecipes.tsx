@@ -11,7 +11,7 @@ interface Recipe {
 
 export function useRecommendedRecipes(currentRecipeId: number, cuisinePath: string) {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -40,17 +40,18 @@ export function useRecommendedRecipes(currentRecipeId: number, cuisinePath: stri
         const scoredRecipes = (data || [])
           .filter(recipe => recipe.id !== currentRecipeId)
           .map(recipe => {
-          let score = 0;
-          
-          // Check how many categories match
-          categories.forEach(category => {
-            if (recipe.cuisine_path.includes(category)) {
-              score += 1;
-            }
-          });
+            let score = 0;
+            
+            // Check how many categories match
+            const recipeCuisinePath = recipe.cuisine_path || '';
+            categories.forEach(category => {
+              if (recipeCuisinePath.includes(category)) {
+                score += 1;
+              }
+            });
 
-          // Boost score with rating
-          score += (recipe.rating || 0) / 10;
+            // Boost score with rating
+            score += (recipe.rating || 0) / 10;
             return { ...recipe, score };
           });
 
@@ -67,9 +68,14 @@ export function useRecommendedRecipes(currentRecipeId: number, cuisinePath: stri
       }
     }
 
-    if (currentRecipeId && cuisinePath) {
-      fetchRecommendedRecipes();
+    if (!currentRecipeId) {
+      setRecipes([]);
+      setError(null);
+      setLoading(false);
+      return;
     }
+
+    fetchRecommendedRecipes();
   }, [currentRecipeId, cuisinePath]);
 
   return { recipes, loading, error };
