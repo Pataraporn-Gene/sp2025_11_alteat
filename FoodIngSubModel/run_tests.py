@@ -16,6 +16,7 @@ import os
 def run_tests(args=None):
     """Run pytest with provided arguments."""
     cmd = ["pytest", "test_backend_api.py"]
+    # cmd = ["python", "-m", "pytest", "test_backend_api.py", "-v"]
     
     if args:
         if isinstance(args, list):

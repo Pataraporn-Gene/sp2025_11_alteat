@@ -554,6 +554,74 @@ class TestRecipeCustomEndpoint:
         assert data["error"] is not None
         assert "substitutes" in data["error"].lower()
 
+# =============================================================================
+# /specific Endpoint Tests
+# =============================================================================
+
+class TestSpecificEndpoint:
+    """Test suite for /specific endpoint."""
+
+    def test_specific_success(self, mock_recipe_service):
+        """Test successful recipe search with required ingredients and recipe context."""
+        mock_recipe_service.get_recipes_with_specific_ingredients.return_value = [
+            RecipeSuggestion(
+                name="Chickpea and Spinach Curry",
+                ingredients="chickpeas, spinach, tomatoes, cumin, garlic, ginger"
+            ),
+            RecipeSuggestion(
+                name="Spinach Chickpea Stew",
+                ingredients="chickpeas, spinach, onion, paprika, olive oil"
+            ),
+        ]
+ 
+        response = client.post("/specific", json={
+            "classification": "specific",
+            "entities": {
+                "required_ingredients": ["chickpeas", "spinach"],
+                "recipe_context": "vegetarian"
+            },
+            "confidence": 0.93
+        })
+ 
+        assert response.status_code == 200
+        data = response.json()
+        assert data["classification"] == "specific"
+        assert "recipes" in data["data"]
+        assert isinstance(data["data"]["recipes"], list)
+        assert len(data["data"]["recipes"]) > 0
+
+    def test_specific_missing_required_ingredients(self):
+        """Test /specific fails when required_ingredients field is missing."""
+        response = client.post("/specific", json={
+            "classification": "specific",
+            "entities": {
+                "recipe_context": "vegetarian"
+            },
+            "confidence": 0.9
+        })
+ 
+        assert response.status_code == 200
+        data = response.json()
+        assert data["error"] is not None
+        assert "required_ingredients" in data["error"].lower()
+        assert data["data"] is None
+
+    def test_specific_empty_required_ingredients(self):
+        """Test /specific fails when required_ingredients is an empty list."""
+        response = client.post("/specific", json={
+            "classification": "specific",
+            "entities": {
+                "required_ingredients": [],
+                "recipe_context": "vegetarian"
+            },
+            "confidence": 0.9
+        })
+ 
+        assert response.status_code == 200
+        data = response.json()
+        assert data["error"] is not None
+        assert "required_ingredients" in data["error"].lower()
+
 
 # =============================================================================
 # /health Endpoint Tests
