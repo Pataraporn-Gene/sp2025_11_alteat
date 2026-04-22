@@ -31,7 +31,7 @@ describe('useRecommendedRecipes', () => {
   it('should not fetch if currentRecipeId or cuisinePath is missing', () => {
     const { result } = renderHook(() => useRecommendedRecipes(0, ''))
 
-    expect(result.current.loading).toBe(true)
+    expect(result.current.loading).toBe(false)
     expect(result.current.recipes).toEqual([])
     expect(supabase.from).not.toHaveBeenCalled()
   })
