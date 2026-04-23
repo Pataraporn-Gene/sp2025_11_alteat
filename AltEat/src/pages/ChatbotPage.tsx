@@ -34,7 +34,8 @@ interface ChatSession {
   created_at: string;
 }
 
-const CHATBOT_API_URL = "/api/chatbot";
+// const CHATBOT_API_URL = "/api/chatbot";
+const CHATBOT_API_URL = "https://n8n-service-alteat.onrender.com/webhook/ea91077d-37f4-42c8-853d-55dd2ae3e33e/chat";
 
 function ChatbotPage() {
   const { t } = useTranslation("chatbot");
