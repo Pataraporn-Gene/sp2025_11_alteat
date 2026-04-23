@@ -34,9 +34,9 @@ interface ChatSession {
   created_at: string;
 }
 
-const N8N_WEBHOOK_URL = "https://primary-production-6fdb0.up.railway.app/webhook/f1725c42-d6af-4b84-adba-86fb367f9f3b/chat";
+// const N8N_WEBHOOK_URL = "https://primary-production-6fdb0.up.railway.app/webhook/f1725c42-d6af-4b84-adba-86fb367f9f3b/chat";
 // const N8N_WEBHOOK_URL = "http://localhost:5678/webhook/f1725c42-d6af-4b84-adba-86fb367f9f3b/chat";
-
+const N8N_WEBHOOK_URL = "http://localhost:5678/webhook/ea91077d-37f4-42c8-853d-55dd2ae3e33e/chat";
 function ChatbotPage() {
   const { t } = useTranslation("chatbot");
   const navigate = useNavigate();
