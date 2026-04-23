@@ -34,9 +34,8 @@ interface ChatSession {
   created_at: string;
 }
 
-// const N8N_WEBHOOK_URL = "https://primary-production-6fdb0.up.railway.app/webhook/f1725c42-d6af-4b84-adba-86fb367f9f3b/chat";
-// const N8N_WEBHOOK_URL = "http://localhost:5678/webhook/f1725c42-d6af-4b84-adba-86fb367f9f3b/chat";
-const N8N_WEBHOOK_URL = "https://n8n-service-alteat.onrender.com/webhook/ea91077d-37f4-42c8-853d-55dd2ae3e33e/chat";
+const CHATBOT_API_URL = "/api/chatbot";
+
 function ChatbotPage() {
   const { t } = useTranslation("chatbot");
   const navigate = useNavigate();
@@ -289,7 +288,7 @@ function ChatbotPage() {
     await saveMessage(sessionId, userMessageId, "user", userMessage);
 
     try {
-      const res = await fetch(N8N_WEBHOOK_URL, {
+      const res = await fetch(CHATBOT_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ chatInput: userMessage, sessionId, messageId: userMessageId, userId: user.id }),

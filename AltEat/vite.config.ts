@@ -9,6 +9,16 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/api/chatbot': {
+        target: 'https://n8n-service-alteat.onrender.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (pathName) => pathName.replace(/^\/api\/chatbot/, '/webhook/ea91077d-37f4-42c8-853d-55dd2ae3e33e/chat'),
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'happy-dom',
