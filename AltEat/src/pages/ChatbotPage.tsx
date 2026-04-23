@@ -294,6 +294,9 @@ function ChatbotPage() {
         body: JSON.stringify({ chatInput: userMessage, sessionId, messageId: userMessageId, userId: user.id }),
       });
 
+      if (!res.ok) {
+        throw new Error(`Server error: ${res.status} ${res.statusText}`);
+      }
       let data = await res.json();
       if (data.data) data = data.data;
 
