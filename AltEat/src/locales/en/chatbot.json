@@ -27,6 +27,7 @@
     "no": "No",
     "comment": "Comment",
     "commentPlaceholder": "Tell us more...",
+    "selectBeforeSubmit": "Please select Yes or No before submitting your comment.",
     "submitting": "Submitting...",
     "thankYou": "Thank you for your feedback!"
   },

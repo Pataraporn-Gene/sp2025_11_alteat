@@ -3,6 +3,26 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import ChatFeedback from '../../component/ChatFeedback'
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'feedback.helpful': 'Was this helpful?',
+        'feedback.yes': 'Yes',
+        'feedback.no': 'No',
+        'feedback.comment': 'Comment',
+        'feedback.commentPlaceholder': 'Tell us more...',
+        'feedback.selectBeforeSubmit': 'Please select Yes or No before submitting your comment.',
+        'feedback.submitting': 'Submitting...',
+        'feedback.thankYou': 'Thank you for your feedback!',
+        'actions.send': 'Send',
+      }
+
+      return translations[key] ?? key
+    },
+  }),
+}))
+
 const { insertMock, fromMock } = vi.hoisted(() => {
   const insert = vi.fn()
   const from = vi.fn(() => ({ insert }))
@@ -85,5 +105,19 @@ describe('ChatFeedback', () => {
     })
 
     expect(await screen.findByText(/thank you for your feedback/i)).toBeInTheDocument()
+  })
+
+  it('shows a warning when submitting comment without selecting yes/no', async () => {
+    insertMock.mockResolvedValue({ error: null })
+    const user = userEvent.setup()
+
+    render(<ChatFeedback messageId="msg-5" />)
+
+    await user.click(screen.getByRole('button', { name: /comment/i }))
+    await user.type(screen.getByPlaceholderText('Tell us more...'), 'Need more details')
+    await user.click(screen.getByRole('button', { name: /send/i }))
+
+    expect(insertMock).not.toHaveBeenCalled()
+    expect(screen.getByText('Please select Yes or No before submitting your comment.')).toBeInTheDocument()
   })
 })

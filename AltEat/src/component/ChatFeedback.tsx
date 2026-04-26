@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { supabase } from "../lib/supabase"
 
 interface ChatFeedbackProps {
@@ -6,9 +7,11 @@ interface ChatFeedbackProps {
 }
 
 function ChatFeedback({ messageId }: ChatFeedbackProps) {
+  const { t } = useTranslation("chatbot")
   const [feedback, setFeedback] = useState<"positive" | "negative" | null>(null)
   const [showComment, setShowComment] = useState(false)
   const [comment, setComment] = useState("")
+  const [showFeedbackRequired, setShowFeedbackRequired] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
 
@@ -37,32 +40,37 @@ function ChatFeedback({ messageId }: ChatFeedbackProps) {
   const handleFeedbackClick = async (type: "positive" | "negative") => {
     if (isSubmitted) return
     setFeedback(type)
+    setShowFeedbackRequired(false)
     if (!showComment) {
       await submitFeedback(type)
     }
   }
 
   const handleCommentSubmit = async () => {
-    if (feedback) {
-      await submitFeedback(feedback, comment)
-      setShowComment(false)
+    if (!feedback) {
+      setShowFeedbackRequired(true)
+      return
     }
+
+    await submitFeedback(feedback, comment)
+    setShowComment(false)
   }
 
   if (isSubmitted) {
     return (
       <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 px-2 py-1 rounded-lg mt-2">
-        <span>✓ Thank you for your feedback!</span>
+        <span>✓ {t("feedback.thankYou")}</span>
       </div>
     )
   }
 
   return (
   <div className="mt-3 p-2 bg-gray-50 rounded-lg border">
-    <div className="flex flex-wrap items-center gap-2 mb-2"> {/* added flex-wrap */}
-      <span className="text-xs text-gray-600">Was this helpful?</span>
+    <div className="flex flex-wrap items-center gap-2 mb-2">
+      <span className="text-xs text-gray-600">{t("feedback.helpful")}</span>
 
       <button
+        type="button"
         onClick={() => handleFeedbackClick("positive")}
         disabled={isSubmitting}
         className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors ${
@@ -71,10 +79,11 @@ function ChatFeedback({ messageId }: ChatFeedbackProps) {
             : "bg-white hover:bg-green-50 text-gray-600 hover:text-green-600"
         } ${isSubmitting ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
       >
-        👍 <span>Yes</span>
+        👍 <span>{t("feedback.yes")}</span>
       </button>
 
       <button
+        type="button"
         onClick={() => handleFeedbackClick("negative")}
         disabled={isSubmitting}
         className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors ${
@@ -83,36 +92,46 @@ function ChatFeedback({ messageId }: ChatFeedbackProps) {
             : "bg-white hover:bg-red-50 text-gray-600 hover:text-red-600"
         } ${isSubmitting ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
       >
-        👎 <span>No</span>
+        👎 <span>{t("feedback.no")}</span>
       </button>
 
       <button
-        onClick={() => setShowComment(!showComment)}
+        type="button"
+        onClick={() => {
+          setShowComment(!showComment)
+          setShowFeedbackRequired(false)
+        }}
         className="flex items-center gap-1 px-2 py-1 rounded-md bg-white hover:bg-blue-50 text-gray-600 hover:text-blue-600 transition-colors text-xs"
       >
-        💬 <span>Comment</span>
+        💬 <span>{t("feedback.comment")}</span>
       </button>
     </div>
 
     {showComment && (
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="Tell us more..."
-          className="flex-1 min-w-0 px-2 py-1 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-[#FFCB69]"
-        />
-        <button
-          onClick={handleCommentSubmit}
-          className="px-2 py-1 bg-[#FFCB69] text-gray-800 rounded-md hover:bg-[#e6b85e] transition-colors text-xs shrink-0"
-        >
-          Send
-        </button>
+      <div>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder={t("feedback.commentPlaceholder")}
+            className="flex-1 min-w-0 px-2 py-1 border border-gray-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-[#FFCB69]"
+          />
+          <button
+            type="button"
+            onClick={handleCommentSubmit}
+            className="px-2 py-1 bg-[#FFCB69] text-gray-800 rounded-md hover:bg-[#e6b85e] transition-colors text-xs shrink-0"
+          >
+            {t("actions.send")}
+          </button>
+        </div>
+        {showFeedbackRequired && (
+          <div className="text-xs text-red-600 mt-1">{t("feedback.selectBeforeSubmit")}</div>
+        )}
       </div>
     )}
 
-    {isSubmitting && <div className="text-xs text-gray-500 mt-1">Submitting...</div>}
+    {isSubmitting && <div className="text-xs text-gray-500 mt-1">{t("feedback.submitting")}</div>}
   </div>
 )
 }
