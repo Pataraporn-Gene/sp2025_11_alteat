@@ -41,14 +41,16 @@
     "save": "Save Preferences",
     "saving": "Saving...",
     "back": "Back",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "removePhoto": "Remove photo"
   },
   "messages": {
     "imageUpdated": "Profile image updated",
     "usernameUpdated": "Username updated",
     "preferencesSaved": "Preferences saved",
     "imageTooLarge": "Image must be under 5MB",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "imageRemoved": "Profile picture removed"
   },
   "delete": {
     "button": "Delete Account",    "dangerZone": "Danger Zone",    "title": "Delete Account",

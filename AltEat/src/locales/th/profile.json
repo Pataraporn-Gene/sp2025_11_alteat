@@ -41,14 +41,16 @@
     "save": "บันทึกการตั้งค่า",
     "saving": "กำลังบันทึก...",
     "back": "กลับ",
-    "cancel": "ยกเลิก"
+    "cancel": "ยกเลิก",
+    "removePhoto": "ลบรูปภาพ"
   },
   "messages": {
     "imageUpdated": "อัปเดตรูปโปรไฟล์แล้ว",
     "usernameUpdated": "อัปเดตชื่อผู้ใช้แล้ว",
     "preferencesSaved": "บันทึกการตั้งค่าแล้ว",
     "imageTooLarge": "รูปภาพต้องมีขนาดไม่เกิน 5MB",
-    "loading": "กำลังโหลด..."
+    "loading": "กำลังโหลด...",
+    "imageRemoved": "ลบรูปโปรไฟล์แล้ว"
   },
   "delete": {
     "button": "ลบบัญชี",

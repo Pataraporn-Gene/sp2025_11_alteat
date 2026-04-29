@@ -102,12 +102,20 @@ export default function ProfilePage() {
 
     const hasChanges =
       languagePreference !== (profile.languages?.[0] || "en") ||
-      JSON.stringify(cuisinePreferences) !== JSON.stringify(profile.cuisine_preferences || []) ||
+      JSON.stringify(cuisinePreferences) !==
+        JSON.stringify(profile.cuisine_preferences || []) ||
       skillLevel !== (profile.skill_level || "beginner") ||
-      JSON.stringify(avoidIngredients) !== JSON.stringify(profile.avoid_ingredients || []);
+      JSON.stringify(avoidIngredients) !==
+        JSON.stringify(profile.avoid_ingredients || []);
 
     setHasUnsavedChanges(hasChanges);
-  }, [profile, languagePreference, cuisinePreferences, skillLevel, avoidIngredients]);
+  }, [
+    profile,
+    languagePreference,
+    cuisinePreferences,
+    skillLevel,
+    avoidIngredients,
+  ]);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -157,6 +165,40 @@ export default function ProfilePage() {
 
       await refreshProfile();
       setMessage({ type: "success", text: t("messages.imageUpdated") });
+    } catch (err: any) {
+      setMessage({ type: "error", text: err.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!profile) return;
+
+    try {
+      setSaving(true);
+
+      const { data: files, error: listError } = await supabase.storage
+        .from("avatars")
+        .list(profile.user_id);
+
+      if (listError) throw listError;
+
+      if (files && files.length > 0) {
+        const paths = files.map((file) => `${profile.user_id}/${file.name}`);
+        const { error: removeError } = await supabase.storage
+          .from("avatars")
+          .remove(paths);
+        if (removeError) throw removeError;
+      }
+
+      await supabase
+        .from("profiles")
+        .update({ avatar_url: null })
+        .eq("user_id", profile.user_id);
+
+      await refreshProfile();
+      setMessage({ type: "success", text: t("messages.imageRemoved") });
     } catch (err: any) {
       setMessage({ type: "error", text: err.message });
     } finally {
@@ -350,7 +392,7 @@ export default function ProfilePage() {
               <div className="bg-white rounded-xl shadow-lg p-6">
                 {/* Avatar */}
                 <div className="flex flex-col items-center">
-                  <div className="relative mb-4">
+                  <div className="relative mb-4 group">
                     <div className="w-32 h-32 rounded-full bg-[#FFF3DB] flex items-center justify-center overflow-hidden border-4 border-[#e48f75]">
                       {profile?.avatar_url ? (
                         <img
@@ -366,10 +408,23 @@ export default function ProfilePage() {
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={saving}
-                      className="absolute bottom-0 right-0 bg-[#e48f75] rounded-full p-2.5 hover:bg-[#E6896D] transition-colors shadow-md disabled:opacity-50"
+                      className="absolute bottom-0 right-0 bg-[#e48f75] rounded-full p-1.5 hover:bg-[#E6896D] transition-colors shadow-md disabled:opacity-50"
                     >
                       <Camera className="h-5 w-5 text-white" />
                     </button>
+
+                    {profile?.avatar_url && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveAvatar}
+                        disabled={saving}
+                        className="absolute top-0 right-0 bg-red-500 rounded-full p-1.5 shadow-md disabled:opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-50 hover:bg-red-600"
+                        title={t("actions.removePhoto")}
+                      >
+                        <X className="h-5 w-5 text-white" />
+                      </button>
+                    )}
+
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -620,7 +675,11 @@ export default function ProfilePage() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div role="dialog" aria-modal="true" className="modal fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="modal fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        >
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl transform transition-all">
             <h3 className="text-lg font-semibold mb-4 border-b border-gray-200 pb-2">
               {t("delete.title")}
@@ -646,7 +705,11 @@ export default function ProfilePage() {
 
       {/* Success Modal */}
       {showDeleteSuccess && (
-        <div role="dialog" aria-modal="true" className="modal fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="modal fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        >
           <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl transform transition-all text-center relative">
             <button
               onClick={handleFinalExit}
@@ -657,7 +720,7 @@ export default function ProfilePage() {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Check className="w-8 h-8 text-green-600" />
             </div>
-             <h3 className="text-xl font-bold mb-2 text-gray-800">
+            <h3 className="text-xl font-bold mb-2 text-gray-800">
               {t("delete.successTitle")}
             </h3>
             <p className="text-gray-600 mb-6">{t("delete.successMessage")}</p>
