@@ -1,6 +1,8 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
-import IngredientDetailPopup, { type IngredientDetail } from "./IngredientDetailPopup";
+import IngredientDetailPopup, {
+  type IngredientDetail,
+} from "./IngredientDetailPopup";
 import { useTranslation } from "react-i18next";
 
 interface IngredientCarouselProps {
@@ -27,9 +29,11 @@ function useCardsPerView() {
 
 function IngredientCarousel({ ingredients }: IngredientCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedIngredient, setSelectedIngredient] = useState<IngredientDetail | null>(null);
+  const [selectedIngredient, setSelectedIngredient] =
+    useState<IngredientDetail | null>(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const { t } = useTranslation('ingredient');
+  const { t } = useTranslation("ingredient");
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
   const cardsPerView = useCardsPerView(); // 👈 replaces the hardcoded 3
   const maxIndex = Math.max(0, ingredients.length - cardsPerView);
@@ -58,19 +62,22 @@ function IngredientCarousel({ ingredients }: IngredientCarouselProps) {
   };
 
   const getTags = (ingredient: IngredientDetail): string[] => {
-    const tags: string[] = []
-    if (ingredient.has_flavor) tags.push(...ingredient.has_flavor.slice(0, 2))
-    if (ingredient.has_texture) tags.push(...ingredient.has_texture.slice(0, 1))
-    if (ingredient.has_color) tags.push(...ingredient.has_color.slice(0, 1))
-    return tags.slice(0, 4)
-  }
+    const tags: string[] = [];
+    if (ingredient.has_flavor) tags.push(...ingredient.has_flavor.slice(0, 2));
+    if (ingredient.has_texture)
+      tags.push(...ingredient.has_texture.slice(0, 1));
+    if (ingredient.has_color) tags.push(...ingredient.has_color.slice(0, 1));
+    return tags.slice(0, 4);
+  };
 
   if (!ingredients || ingredients.length === 0) {
     return null;
   }
 
   return (
-    <div className="w-full max-w-2xl px-4 sm:px-0"> {/* 👈 added px-4 on mobile */}
+    <div className="w-full max-w-2xl px-4 sm:px-0">
+      {" "}
+      {/* 👈 added px-4 on mobile */}
       <div className="relative">
         {currentIndex > 0 && (
           <button
@@ -93,10 +100,28 @@ function IngredientCarousel({ ingredients }: IngredientCarouselProps) {
               <div
                 key={ingredient.ingredient_id}
                 className="flex-shrink-0 bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-                style={{ width: `calc(${100 / cardsPerView}% - ${(cardsPerView - 1) * 12 / cardsPerView}px)` }}
+                style={{
+                  width: `calc(${100 / cardsPerView}% - ${((cardsPerView - 1) * 12) / cardsPerView}px)`,
+                }}
               >
                 <div className="relative h-30 bg-gradient-to-br from-[#FFEDDD] to-[#FFCB69] flex items-center justify-center">
-                  <span className="text-4xl text-[#562C0C]">{ingredient.ingredient_name.charAt(0).toUpperCase()}</span>
+                  {!imageErrors[ingredient.ingredient_id] ? (
+                    <img
+                      src={`https://yrpoikxovgaplilgwfys.supabase.co/storage/v1/object/public/ingredients_img/${ingredient.ingredient_id}.jpg`}
+                      alt={ingredient.ingredient_name}
+                      className="w-full h-full object-cover"
+                      onError={() =>
+                        setImageErrors((prev) => ({
+                          ...prev,
+                          [ingredient.ingredient_id]: true,
+                        }))
+                      }
+                    />
+                  ) : (
+                    <span className="text-4xl text-[#562C0C]">
+                      {ingredient.ingredient_name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
                 </div>
 
                 <div className="p-2 flex flex-col items-center">
@@ -107,7 +132,7 @@ function IngredientCarousel({ ingredients }: IngredientCarouselProps) {
                     onClick={() => handleViewDetail(ingredient)}
                     className="w-full py-1.5 px-2 bg-[#562C0C] text-white text-sm rounded-full hover:bg-[#3d1f08] transition-colors"
                   >
-                    {t('detail.moreDetail')}
+                    {t("detail.moreDetail")}
                   </button>
                 </div>
               </div>
@@ -125,7 +150,6 @@ function IngredientCarousel({ ingredients }: IngredientCarouselProps) {
           </button>
         )}
       </div>
-
       {ingredients.length > cardsPerView && (
         <div className="flex justify-center gap-2 mt-4">
           {Array.from({ length: maxIndex + 1 }).map((_, index) => (
@@ -140,7 +164,6 @@ function IngredientCarousel({ ingredients }: IngredientCarouselProps) {
           ))}
         </div>
       )}
-
       <IngredientDetailPopup
         ingredient={selectedIngredient}
         tags={selectedIngredient ? getTags(selectedIngredient) : []}
