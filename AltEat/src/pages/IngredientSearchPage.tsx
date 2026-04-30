@@ -387,7 +387,7 @@ function IngredientSearchpage() {
                       {t("ingredient:search.noIngredientsFound")}
                     </div>
                     <p className="text-gray-500 text-sm md:text-base">
-                      {t("ingredient:search.adjustingFilters")}
+                      {t("ingredient:search.adjustFilters")}
                     </p>
                   </div>
                 ) : (

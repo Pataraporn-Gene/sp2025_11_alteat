@@ -1,6 +1,6 @@
 import type React from "react";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Navbar from "../component/Navbar";
 import SearchSideBar from "../component/SearchSideBar";
 import { recipeFilter } from "../data/recipeFilter";
@@ -33,7 +33,9 @@ function RecipeSearchPage() {
   const PAGE_SIZE = 20;
 
   const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false); 
+  const [totalCount, setTotalCount] = useState<number | null>(null);
+  const allRecipesRef = useRef<any[]>([]);
 
   const activeFilterCount =
     filters.ingredient.length + filters.method.length + filters.cuisine.length;
@@ -100,6 +102,7 @@ function RecipeSearchPage() {
         setRecipes([]);
         setHasMore(false);
         setHasSearched(false);
+        setTotalCount(null);
         return;
       }
 
@@ -107,65 +110,57 @@ function RecipeSearchPage() {
       setHasSearched(true);
 
       try {
-        let query = supabase.from("recipes").select("*", { count: "exact" });
+        const cachedRows = allRecipesRef.current;
 
-        // Apply search query
-        if (searchQuery.trim()) {
-          const translatedQuery = await translateToEnglish(searchQuery);
-          const searchTerm = translatedQuery.trim();
-          query = query.or(
-            `recipe_name.ilike.%${searchTerm}%,ingredients.ilike.%${searchTerm}%,cuisine_path.ilike.%${searchTerm}%`,
-          );
+        // Load the full matched result set once so the displayed count reflects
+        // the total number of matching recipes instead of the current page size.
+        if (pageNum === 0 || cachedRows.length === 0) {
+          const translatedSearchQuery = searchQuery.trim()
+            ? await translateToEnglish(searchQuery)
+            : "";
+          const searchTerms = translatedSearchQuery
+            .split(/[\s,，。.!?;:/\\|_-]+/)
+            .map((s) => s.trim().toLowerCase())
+            .filter(Boolean);
+
+          const terms = [
+            ...filters.ingredient,
+            ...filters.method,
+            ...filters.cuisine,
+            ...searchTerms,
+          ]
+            .map((s) => s.trim().toLowerCase())
+            .filter(Boolean);
+
+          const { data, error } = await supabase.rpc("search_recipes", {
+            search_terms: terms,
+            result_limit: 5000,
+          });
+
+          if (error) {
+            console.error("RPC error fetching recipes:", error);
+            allRecipesRef.current = [];
+            setRecipes([]);
+            setHasMore(false);
+            setTotalCount(null);
+            return;
+          }
+
+          allRecipesRef.current = data || [];
+          setTotalCount(allRecipesRef.current.length);
         }
 
-        // Apply cuisine filter
-        if (filters.cuisine.length > 0) {
-          const cuisineConditions = filters.cuisine
-            .map((c) => `cuisine_path.ilike.%${c}%`)
-            .join(",");
-          query = query.or(cuisineConditions);
-        }
+        const rows = allRecipesRef.current;
+        const pageSlice = rows.slice(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE);
 
-        // Apply ingredient filter
-        if (filters.ingredient.length > 0) {
-          const ingredientConditions = filters.ingredient
-            .map((i) => `ingredients.ilike.%${i}%`)
-            .join(",");
-          query = query.or(ingredientConditions);
-        }
-
-        // Apply method filter
-        if (filters.method.length > 0) {
-          const methodConditions = filters.method
-            .map((m) => `directions.ilike.%${m}%,recipe_name.ilike.%${m}%`)
-            .join(",");
-          query = query.or(methodConditions);
-        }
-
-        // Pagination
-        const from = pageNum * PAGE_SIZE;
-        const to = from + PAGE_SIZE - 1;
-
-        console.log("Query:", query);
-        const { data, error, count } = await query.range(from, to);
-
-        if (error) {
-          console.error("Error fetching recipes:", error);
-          setRecipes([]);
-          setHasMore(false);
-          return;
-        }
-
-        setRecipes((prev) =>
-          pageNum === 0 ? data || [] : [...prev, ...(data || [])],
-        );
-
-        const totalFetched = (pageNum + 1) * PAGE_SIZE;
-        setHasMore(totalFetched < (count || 0));
+        setRecipes((prev) => (pageNum === 0 ? pageSlice : [...prev, ...pageSlice]));
+        setHasMore((pageNum + 1) * PAGE_SIZE < rows.length);
       } catch (err) {
         console.error(err);
         setRecipes([]);
         setHasMore(false);
+        setTotalCount(null);
+        allRecipesRef.current = [];
       } finally {
         setLoading(false);
       }
@@ -177,6 +172,7 @@ function RecipeSearchPage() {
   useEffect(() => {
     setPage(0);
     setHasMore(false);
+    allRecipesRef.current = [];
   }, [filters, searchQuery]);
 
   // Fetch when page, filters, or search changes
@@ -369,7 +365,9 @@ function RecipeSearchPage() {
                 <div className="w-full">
                   <h3 className="my-5 sm:my-7 text-xl sm:text-2xl">
                     {hasSearched
-                      ? t("recipe:search.youCanMake", { count: recipes.length })
+                      ? t("recipe:search.youCanMake", {
+                          count: totalCount ?? recipes.length,
+                        })
                       : ""}
                   </h3>
                   <div className="flex flex-col items-start">
